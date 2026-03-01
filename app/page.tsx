@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CalendarContainer from "./components/calendar/CalendarContainer";
 import { Text } from "./components/ui";
+import { ExpandOnHover } from "./components/ui/expand-cards";
 import { motion } from "framer-motion";
 
 const fade = (delay = 0) => ({
@@ -125,6 +126,16 @@ export default function Home() {
             </Link>
           </motion.div>
         </section>
+
+        {/* ── Event Gallery ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 50, damping: 22, delay: 0.22 }}
+          className="px-6 md:px-10 pb-16 hidden sm:block"
+        >
+          <ExpandOnHover />
+        </motion.section>
 
         {/* ── Stats bar ── */}
         <motion.section
