@@ -5,6 +5,7 @@ export interface TeamMember {
   image: string;
   linkedinUrl?: string;
   websiteUrl?: string;
+  email?: string;
   description?: string;
 }
 
@@ -24,6 +25,7 @@ export const teamMembers: TeamMember[] = [
     position: "President",
     image: "/staff/shiven.png",
     linkedinUrl: "https://www.linkedin.com/in/shiven-shekar/",
+    email: "shiven.shekar@asu.edu",
     description:
       "I'm a senior studying Computer Science with a Software Engineering concentration at Arizona State University. My interests lie in AppliedML and Distributed Systems.",
   },
