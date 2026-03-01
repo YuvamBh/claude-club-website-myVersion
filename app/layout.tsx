@@ -3,7 +3,7 @@ import { Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "./components/ThemeProvider";
-import DarkModeToggle from "./components/DarkModeToggle";
+// import DarkModeToggle from "./components/DarkModeToggle";
 import { Analyze } from "./components/analytics/Analyze";
 import "./globals.css";
 import Script from "next/script";
@@ -42,12 +42,12 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          forcedTheme="dark"
           disableTransitionOnChange
         >
           {children}
-          <DarkModeToggle />
+          {/* <DarkModeToggle /> */}
           <Analytics />
           <SpeedInsights />
           <Analyze />
