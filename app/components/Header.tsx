@@ -90,46 +90,37 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full mesh-background-header top-0 sticky z-50 backdrop-blur-md border-b border-[var(--theme-card-border)] shadow-sm">
-      {/* <GradualBlur position="bottom" strength={3} height="4rem" className={`z-0 relative`} /> */}
-      <div className="px-4 sm:px-6 lg:px-8 relative z-20">
-        <div className="flex items-center justify-between h-16 overflow-visible">
+    <header className="w-full mesh-background-header top-0 sticky z-50 backdrop-blur-md border-b border-[var(--theme-card-border)]">
+      <div className="px-6 sm:px-8 lg:px-12 relative z-20">
+        <div className="flex items-center justify-between h-14 overflow-visible">
           {/* Logo on the left */}
           <motion.div
-            initial={{ opacity: hasAnimated ? 1 : 0, x: hasAnimated ? 0 : -20 }}
+            initial={{ opacity: hasAnimated ? 1 : 0, x: hasAnimated ? 0 : -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={hasAnimated ? { duration: 0 } : { type: "spring", stiffness: 100, damping: 15 }}
           >
             <Link
               href="/"
-              className={`relative z-10 group hover:scale-105 transition-all duration-200 px-4 py-3 rounded-lg hover:bg-white/10 min-h-[48px] flex items-center touch-manipulation`}
+              className="group flex items-center min-h-[44px] touch-manipulation"
               data-umami-event="Logo Click"
             >
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight cursor-pointer font-sans whitespace-nowrap">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight cursor-pointer font-sans whitespace-nowrap">
                 <span className="text-[var(--theme-text-primary)] group-hover:text-[var(--theme-text-accent)] transition-colors duration-200">
                   ANTHROPIC
                 </span>{" "}
-                <span className="text-[var(--theme-text-primary)] group-hover:text-[var(--theme-text-accent)] transition-colors duration-200">
+                <span className="text-[var(--theme-text-primary)]/50 group-hover:text-[var(--theme-text-accent)]/70 transition-colors duration-200 font-normal">
                   @ ASU
                 </span>
               </h1>
             </Link>
           </motion.div>
 
-          {/* Navigation buttons in the middle */}
-          <nav className="hidden lg:flex items-center space-x-8 overflow-visible">
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-1 overflow-visible">
             {navigationItems.map((item, index) => {
               const isDefault = item.variant === "default" || !item.variant;
               const isPrimary = item.variant === "primary";
               const isSecondary = item.variant === "secondary";
-
-              const baseClasses = `relative z-10 transition-all duration-200 font-medium font-sans px-${isDefault ? '4' : '6'} py-3 rounded-${isDefault ? 'md' : 'lg'} min-h-[48px] flex items-center touch-manipulation`;
-              
-              const variantClasses = isDefault
-                ? "text-[var(--theme-text-primary)] hover:text-[var(--theme-text-accent)] hover:bg-white/10"
-                : isPrimary
-                ? "bg-[var(--theme-button-bg)] text-white hover:bg-[var(--theme-button-hover-bg)] hover:shadow-lg"
-                : "bg-[var(--theme-button-alternate-bg)] text-[var(--theme-button-alternate-text)] hover:bg-[var(--theme-button-hover-bg)] hover:text-[var(--theme-button-hover-text)] hover:shadow-lg border border-transparent hover:border-[var(--theme-button-hover-border)]";
 
               return (
                 <motion.div
@@ -138,55 +129,48 @@ export default function Header() {
                   initial="hidden"
                   animate="visible"
                   variants={navItemVariants}
-                  className={isSecondary ? "relative z-10" : undefined}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.05, y: isDefault ? 0 : -2 }}
-                    whileTap={{ scale: 0.95 }}
+                  <Link
+                    href={item.href}
+                    target={item.isExternal ? "_blank" : undefined}
+                    rel={item.isExternal ? "noopener noreferrer" : undefined}
+                    data-umami-event={item.umamiEvent}
+                    className={
+                      isDefault
+                        ? "relative px-3 py-2 text-sm font-medium text-[var(--theme-text-primary)]/70 hover:text-[var(--theme-text-primary)] transition-colors duration-200 group flex items-center gap-1"
+                        : isPrimary
+                        ? "ml-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-md hover:scale-[1.03]"
+                        : "ml-1 px-5 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 hover:shadow-md hover:scale-[1.03]"
+                    }
+                    style={
+                      isPrimary
+                        ? { background: "var(--theme-button-bg)", color: "var(--theme-button-text)" }
+                        : isSecondary
+                        ? { borderColor: "var(--theme-text-accent)", color: "var(--theme-text-accent)", background: "transparent" }
+                        : {}
+                    }
                   >
-                    <Link
-                      href={item.href}
-                      target={item.isExternal ? "_blank" : undefined}
-                      rel={item.isExternal ? "noopener noreferrer" : undefined}
-                      className={`${baseClasses} ${variantClasses} ${isPrimary ? 'z-20' : ''} ${isSecondary ? 'overflow-visible' : ''}`}
-                      data-umami-event={item.umamiEvent}
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.div>
+                    {item.label}
+                    {isDefault && (
+                      <span className="absolute bottom-0 left-3 right-3 h-[1.5px] rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" style={{ background: "var(--theme-text-accent)" }} />
+                    )}
+                  </Link>
                 </motion.div>
               );
             })}
 
-            {/* Command Menu Trigger Button */}
-            <motion.div
-              custom={navigationItems.length}
-              initial="hidden"
-              animate="visible"
-              variants={navItemVariants}
-            >
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            {/* Search button */}
+            <motion.div custom={navigationItems.length} initial="hidden" animate="visible" variants={navItemVariants}>
+              <button
                 onClick={() => setIsCommandMenuOpen(true)}
-                className="relative z-10 text-[var(--theme-text-primary)] hover:text-[var(--theme-text-accent)] transition-all duration-200 p-3 rounded-md hover:bg-white/10 min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation"
+                className="ml-2 p-2 rounded-lg text-[var(--theme-text-primary)]/50 hover:text-[var(--theme-text-primary)] transition-colors duration-200"
                 aria-label="Open command menu"
                 title="Search (⌘K)"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-              </motion.button>
+              </button>
             </motion.div>
           </nav>
 
