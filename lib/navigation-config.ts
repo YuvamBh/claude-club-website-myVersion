@@ -87,6 +87,18 @@ export const getNavigationItems = (): NavigationItem[] => {
       umamiEvent: "Nav - Contact",
       variant: "default",
     },
+    {
+      label: "Past Events",
+      href: "/past-events",
+      description: "Browse our past workshops, hackathons, and meetups",
+      category: "main",
+      showInHeader: true,
+      showInCommandMenu: true,
+      keywords: ["events", "past", "history", "hackathon", "workshop", "meetup"],
+      icon: "📅",
+      umamiEvent: "Nav - Past Events",
+      variant: "default",
+    },
     
     // Conditional pages
     {
