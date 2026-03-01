@@ -31,8 +31,8 @@
   --theme-button-alternate-hover-text: #212120;
   --theme-button-alternate-hover-border: #212120;
 
-  --theme-pattern-color: rgba(204, 120, 92, 0.1);
-  --theme-pattern-color-light: rgba(204, 120, 92, 0.05);
+  --theme-pattern-color: rgba(204, 120, 92, 0.05);
+  --theme-pattern-color-light: rgba(204, 120, 92, 0.025);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -99,8 +99,8 @@
   --theme-button-alternate-hover-text: #ffc9b3;
   --theme-button-alternate-hover-border: #ff9b7a;
 
-  --theme-pattern-color: rgba(255, 155, 122, 0.1);
-  --theme-pattern-color-light: rgba(255, 155, 122, 0.05);
+  --theme-pattern-color: rgba(255, 155, 122, 0.05);
+  --theme-pattern-color-light: rgba(255, 155, 122, 0.025);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);

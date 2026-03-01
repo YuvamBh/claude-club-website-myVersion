@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { Heading, Text, TiltCard, Container } from "../components/ui";
+import { Heading, Text, Container } from "../components/ui";
 
 const currentSponsor = {
   name: "Anthropic",
@@ -131,37 +131,25 @@ export default function IndustryPage() {
                 href={currentSponsor.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block h-full"
                 aria-label={`Visit ${currentSponsor.name}`}
+                className="block rounded-2xl border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                style={{ borderColor: "var(--theme-card-border)", background: "var(--theme-card-bg)" }}
               >
-                <TiltCard
-                  gradient
-                  hoverable
-                  tiltMaxAngleX={8}
-                  tiltMaxAngleY={8}
-                  transitionSpeed={600}
-                  tiltClassName="h-full"
-                  className="h-full"
-                >
-                  <div className="space-y-6">
-                    <div className="relative h-16 w-44 sm:h-20 sm:w-56">
-                      <Image
-                        src={currentSponsor.logo}
-                        alt={`${currentSponsor.name} logo`}
-                        fill
-                        sizes="(max-width: 640px) 200px, 224px"
-                        className="object-contain drop-shadow-[0_4px_30px_rgba(0,0,0,0.4)] dark:invert dark:hue-rotate-180"
-                        priority
-                      />
-                    </div>
-                    <Text
-                      variant="secondary"
-                      className="text-sm leading-relaxed"
-                    >
-                      {currentSponsor.description}
-                    </Text>
+                <div className="space-y-5">
+                  <div className="relative h-14 w-40">
+                    <Image
+                      src={currentSponsor.logo}
+                      alt={`${currentSponsor.name} logo`}
+                      fill
+                      sizes="160px"
+                      className="object-contain dark:invert dark:hue-rotate-180"
+                      priority
+                    />
                   </div>
-                </TiltCard>
+                  <Text variant="secondary" className="text-sm leading-relaxed">
+                    {currentSponsor.description}
+                  </Text>
+                </div>
               </Link>
             </motion.div>
           </section>
@@ -179,7 +167,7 @@ export default function IndustryPage() {
                 Work With Us Like an Extension of Your Team
               </Heading>
             </div>
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-5 lg:grid-cols-3">
               {partnershipFaq.map((item, index) => (
                 <motion.div
                   key={item.question}
@@ -188,33 +176,19 @@ export default function IndustryPage() {
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.3 }}
                   variants={fadeUp}
+                  className="rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  style={{ borderColor: "var(--theme-card-border)", background: "var(--theme-card-bg)" }}
                 >
-                  <TiltCard
-                    glareMaxOpacity={0.1}
-                    tiltMaxAngleX={6}
-                    tiltMaxAngleY={6}
-                    scale={1.01}
-                    transitionSpeed={600}
-                    hoverable
-                    gradient
-                    tiltClassName="h-full"
-                    className="h-full"
+                  <Heading
+                    level="h6"
+                    animate={false}
+                    className="!text-base sm:!text-lg mb-3 font-semibold"
                   >
-                    <Heading
-                      level="h6"
-                      animate={false}
-                      className="!text-lg sm:!text-xl mb-3 font-semibold"
-                    >
-                      {item.question}
-                    </Heading>
-                    <Text
-                      variant="secondary"
-                      size="sm"
-                      className="!text-sm leading-6"
-                    >
-                      {item.answer}
-                    </Text>
-                  </TiltCard>
+                    {item.question}
+                  </Heading>
+                  <Text variant="secondary" size="sm" className="!text-sm leading-6">
+                    {item.answer}
+                  </Text>
                 </motion.div>
               ))}
             </div>
@@ -224,7 +198,7 @@ export default function IndustryPage() {
             <Heading level="h2" animate={false}>
               Past Sponsors
             </Heading>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {pastSponsors.map((sponsor, index) => (
                 <motion.div
                   key={sponsor.name}
@@ -238,29 +212,19 @@ export default function IndustryPage() {
                     href={sponsor.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block h-full"
+                    className="flex items-center justify-center rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    style={{ borderColor: "var(--theme-card-border)", background: "var(--theme-card-bg)" }}
                     aria-label={`Visit ${sponsor.name}`}
                   >
-                    <TiltCard
-                      glareMaxOpacity={0.12}
-                      tiltMaxAngleX={8}
-                      tiltMaxAngleY={8}
-                      animated={false}
-                      hoverable
-                      tiltClassName="h-full"
-                      className="flex items-center justify-center py-6"
-                      childrenAreRelative
-                    >
-                      <div className="relative h-10 w-24 sm:h-12 sm:w-28">
-                        <Image
-                          src={sponsor.logo}
-                          alt={`${sponsor.name} logo`}
-                          fill
-                          sizes="112px"
-                          className="object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.35)] dark:invert dark:hue-rotate-180"
-                        />
-                      </div>
-                    </TiltCard>
+                    <div className="relative h-9 w-20">
+                      <Image
+                        src={sponsor.logo}
+                        alt={`${sponsor.name} logo`}
+                        fill
+                        sizes="80px"
+                        className="object-contain dark:invert dark:hue-rotate-180"
+                      />
+                    </div>
                   </Link>
                 </motion.div>
               ))}
