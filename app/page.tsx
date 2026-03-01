@@ -4,8 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CalendarContainer from "./components/calendar/CalendarContainer";
 import JoinCard from "./components/JoinCard";
-import HackathonPromo from "./components/HackathonPromo";
-import { showHackathonPromo } from "./theme-config";
+
 import { Text } from "./components/ui";
 import { motion } from "framer-motion";
 
@@ -167,12 +166,7 @@ export default function Home() {
                 />
               </motion.div>
 
-              {/* Hackathon promo */}
-              {showHackathonPromo && (
-                <motion.div variants={fade(0.15)}>
-                  <HackathonPromo />
-                </motion.div>
-              )}
+
             </motion.div>
 
             {/* ── RIGHT: Calendar ── */}

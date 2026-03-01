@@ -108,8 +108,6 @@ export const getNavigationItems = (): NavigationItem[] => {
       category: "main",
       showInHeader: true,
       showInCommandMenu: true,
-      isConditional: true,
-      isVisible: () => showHackathonPromo,
       keywords: ["hackathon", "event", "competition", "coding"],
       icon: "🚀",
       umamiEvent: "Nav - Hackathon",

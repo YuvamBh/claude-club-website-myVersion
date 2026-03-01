@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import GradualBlur from "./ui/GradualBlur";
 import { getHeaderNavigationItems } from "@/lib/navigation-config";
 import CommandMenu from "./CommandMenu";
-import { showHackathonPromo } from "@/app/theme-config";
+
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -312,18 +312,16 @@ export default function Header() {
                     Past Events
                   </Link>
                 </motion.div>
-                {showHackathonPromo && (
-                  <motion.div variants={mobileItemVariants}>
-                    <Link
-                      href="/hackathon"
-                      className={`relative z-20 flex px-3 py-4 bg-[var(--theme-button-alternate-bg)] text-[var(--theme-button-alternate-text)] hover:bg-[var(--theme-button-hover-bg)] hover:text-[var(--theme-button-hover-text)] transition-all duration-300 ease-in-out font-medium text-base font-sans border border-[var(--theme-button-alternate-border)] hover:border-[var(--theme-button-hover-border)] rounded-lg min-h-[48px] items-center touch-manipulation`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      data-umami-event="Mobile Nav - Hackathon"
-                    >
-                      Hackathon
-                    </Link>
-                  </motion.div>
-                )}
+                <motion.div variants={mobileItemVariants}>
+                  <Link
+                    href="/hackathon"
+                    className={`relative z-20 flex px-3 py-4 bg-[var(--theme-button-alternate-bg)] text-[var(--theme-button-alternate-text)] hover:bg-[var(--theme-button-hover-bg)] hover:text-[var(--theme-button-hover-text)] transition-all duration-300 ease-in-out font-medium text-base font-sans border border-[var(--theme-button-alternate-border)] hover:border-[var(--theme-button-hover-border)] rounded-lg min-h-[48px] items-center touch-manipulation`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    data-umami-event="Mobile Nav - Hackathon"
+                  >
+                    Hackathon
+                  </Link>
+                </motion.div>
                 <motion.div variants={mobileItemVariants}>
                   <Link
                     href="https://docs.google.com/forms/d/e/1FAIpQLScP9LuFwiHEx806tv9zczjCIEzqO1Zjb-FjB4XWoa6BS1NNKQ/viewform"
