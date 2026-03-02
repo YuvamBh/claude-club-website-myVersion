@@ -73,25 +73,64 @@ export default function Footer() {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-1/2 pointer-events-none"
         style={{
-          background:
-            "linear-gradient(90deg, transparent, var(--theme-text-accent), transparent)",
+          background: "linear-gradient(90deg, transparent, var(--theme-text-accent), transparent)",
           opacity: 0.4,
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+      {/* ── Mobile footer: compact bar ── */}
+      <div className="sm:hidden px-6 py-6 space-y-5">
+        {/* Brand + socials row */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold tracking-wide text-[var(--theme-text-primary)] uppercase">
+            ASU Claude Builder Club
+          </span>
+          <div className="flex items-center gap-2">
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="p-2 rounded-lg text-[var(--theme-text-primary)]/60 hover:text-[var(--theme-text-accent)] transition-colors"
+              >
+                {s.icon}
+              </a>
+            ))}
+          </div>
+        </div>
+        {/* Nav links grid */}
+        <div className="grid grid-cols-3 gap-y-3">
+          {quickLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm text-[var(--theme-text-primary)]/60 hover:text-[var(--theme-text-accent)] transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+        {/* Copyright */}
+        <p className="text-xs text-[var(--theme-text-primary)]/35 pt-1 border-t border-[var(--theme-card-border)]">
+          © {new Date().getFullYear()} ASU Claude Builder Club
+        </p>
+      </div>
+
+      <div className="hidden sm:block max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 sm:gap-12">
           {/* Column 1 — Brand */}
-          <motion.div variants={itemVariants} className="space-y-3">
+          <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pb-6 sm:pb-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-sm font-bold tracking-wide text-[var(--theme-text-primary)] uppercase">
               ASU Claude Builder Club
             </p>
-            <p className="text-xs text-[var(--theme-text-primary)]/60 leading-relaxed max-w-xs">
+            <p className="text-xs text-[var(--theme-text-primary)]/60 leading-relaxed max-w-xs mx-auto sm:mx-0">
               Building the next generation of AI-native products at Arizona State
               University.
             </p>
             {/* Social icons */}
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3 pt-1 justify-center sm:justify-start">
               {socialLinks.map((s) => (
                 <motion.a
                   key={s.label}
@@ -110,7 +149,7 @@ export default function Footer() {
           </motion.div>
 
           {/* Column 2 — Quick Links */}
-          <motion.div variants={itemVariants} className="space-y-3">
+          <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left py-6 sm:py-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Quick Links
             </p>
@@ -121,7 +160,7 @@ export default function Footer() {
                     href={link.href}
                     className="text-sm text-[var(--theme-text-primary)]/70 hover:text-[var(--theme-text-accent)] transition-colors duration-200 inline-flex items-center gap-1 group"
                   >
-                    <span className="w-0 group-hover:w-2 h-px bg-[var(--theme-text-accent)] transition-all duration-200 rounded" />
+                    <span className="w-0 group-hover:w-2 h-px bg-[var(--theme-text-accent)] transition-all duration-200 rounded hidden sm:inline-block" />
                     {link.label}
                   </Link>
                 </li>
@@ -130,14 +169,14 @@ export default function Footer() {
           </motion.div>
 
           {/* Column 3 — Sponsor CTA */}
-          <motion.div variants={itemVariants} className="space-y-3">
+          <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pt-6 sm:pt-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Partner With Us
             </p>
             <p className="text-xs text-[var(--theme-text-primary)]/60 leading-relaxed">
               Interested in sponsoring our events or partnering with our club?
             </p>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex justify-center sm:justify-start">
               <Link
                 href="/contact"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--theme-text-accent)] hover:underline underline-offset-4 transition-all duration-200"
@@ -154,9 +193,9 @@ export default function Footer() {
         {/* Bottom bar */}
         <motion.div
           variants={itemVariants}
-          className="mt-8 pt-6 border-t border-[var(--theme-card-border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--theme-text-primary)]/40"
+          className="mt-8 pt-6 border-t border-[var(--theme-card-border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--theme-text-primary)]/40 text-center"
         >
-          <span>© {new Date().getFullYear()} Arizona State University Claude Builder Club. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} ASU Claude Builder Club. All rights reserved.</span>
           <motion.a
             href="https://github.com/shiven01/asucbc"
             target="_blank"
