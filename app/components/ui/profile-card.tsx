@@ -26,7 +26,7 @@ export function ProfileCard({
     linkedinUrl && { icon: Linkedin, url: linkedinUrl, label: "LinkedIn" },
     websiteUrl && { icon: Globe, url: websiteUrl, label: "Website" },
     email && { icon: Mail, url: `mailto:${email}`, label: "Email" },
-  ].filter(Boolean) as { icon: React.ElementType; url: string; label: string }[];
+  ].filter(Boolean) as { icon: React.ComponentType<{ className?: string }>; url: string; label: string }[];
 
   return (
     <>

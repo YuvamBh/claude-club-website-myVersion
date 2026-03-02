@@ -12,7 +12,7 @@ interface EventData {
   description: string;
   highlights: string[];
   image: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<any>;
 }
 
 const EVENTS: EventData[] = [
@@ -65,7 +65,7 @@ export default function PastEventsPage() {
 
   const bgEls = React.useRef<Map<number, HTMLDivElement>>(new Map());
   const cardEls = React.useRef<Map<number, HTMLDivElement>>(new Map());
-  const rafRef = React.useRef<number>();
+  const rafRef = React.useRef<number | null>(null);
   const renderedRange = React.useRef({ min: -BUFFER, max: BUFFER });
 
   const applyParallax = (img: HTMLImageElement | null, scrollY: number, idx: number, h: number) => {
