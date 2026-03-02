@@ -46,49 +46,130 @@ export default function Home() {
             className="absolute inset-0 w-full h-full"
           />
         </section>
+
+        {/* ── Mission Statement ── */}
+        <section className="px-6 sm:px-12 md:px-24 py-24 w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ type: "spring", stiffness: 50, damping: 22 }}
+            className="max-w-5xl mx-auto"
+          >
+            {/* Label */}
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.25em] mb-6"
+              style={{ color: "var(--theme-text-accent)" }}
+            >
+              ASU × Anthropic
+            </p>
+
+            {/* Big statement */}
+            <h2
+              className="text-4xl sm:text-5xl xl:text-6xl font-bold leading-[1.07] tracking-tight text-balance mb-6"
+              style={{ color: "var(--theme-text-primary)" }}
+            >
+              Not a lecture. Not a club fair table.{" "}
+              <span
+                style={{
+                  background: "linear-gradient(120deg, var(--theme-text-accent) 0%, color-mix(in oklab, var(--theme-text-accent) 55%, white) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                A place where AI gets built.
+              </span>
+            </h2>
+            <p
+              className="text-base sm:text-lg leading-relaxed max-w-2xl mb-16"
+              style={{ color: "var(--theme-text-primary)", opacity: 0.55 }}
+            >
+              We are ASU's official Anthropic student club. Every semester we run workshops,
+              build sessions, and a 24-hour hackathon — all centred around shipping
+              real things with Claude.
+            </p>
+
+            {/* Three value pillars */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border" style={{ borderColor: "var(--theme-card-border)" }}>
+              {[
+                {
+                  num: "01",
+                  title: "Everyone ships.",
+                  body: "No passive observers. Every member leaves each session having pushed something real — an app, an agent, a feature.",
+                },
+                {
+                  num: "02",
+                  title: "Anthropic-backed.",
+                  body: "API credits, Claude Pro access, and direct ties to Anthropic's team. You build on the same model used by companies at scale.",
+                },
+                {
+                  num: "03",
+                  title: "Open to everyone.",
+                  body: "CS, design, business, pre-med — if you're curious about AI and want to build things that matter, you belong here.",
+                },
+              ].map((p, i) => (
+                <motion.div
+                  key={p.num}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08, type: "spring", stiffness: 55, damping: 22 }}
+                  className="flex flex-col gap-4 px-7 py-8"
+                  style={{ background: "var(--theme-card-bg)" }}
+                >
+                  <span
+                    className="text-xs font-mono tracking-widest"
+                    style={{ color: "var(--theme-text-accent)", opacity: 0.7 }}
+                  >
+                    {p.num}
+                  </span>
+                  <h3
+                    className="text-lg font-bold"
+                    style={{ color: "var(--theme-text-primary)" }}
+                  >
+                    {p.title}
+                  </h3>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--theme-text-primary)", opacity: 0.55 }}
+                  >
+                    {p.body}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
         {/* ── Event Gallery ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 50, damping: 22, delay: 0.22 }}
-          className="px-6 md:px-10 pb-16 hidden sm:block"
+          className="pb-6 hidden sm:block"
         >
           <ExpandOnHover />
         </motion.section>
 
-        {/* ── Stats bar ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 50, damping: 22, delay: 0.28 }}
-          className="px-6 sm:px-10 md:px-20 pb-16"
+        {/* ── Stats inline strip ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="px-6 sm:px-12 md:px-24 pb-16 max-w-5xl mx-auto w-full"
         >
-          <div
-            className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 rounded-2xl overflow-hidden border"
-            style={{ borderColor: "var(--theme-card-border)", background: "var(--theme-card-bg)" }}
-          >
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.32 + i * 0.06 }}
-                className="flex flex-col items-center justify-center py-7 px-4 text-center"
-                style={{ borderColor: "var(--theme-card-border)" }}
-              >
-                <span
-                  className="text-3xl font-bold tracking-tight mb-1"
-                  style={{ color: "var(--theme-text-accent)" }}
-                >
-                  {stat.value}
-                </span>
-                <Text size="xs" variant="secondary" className="uppercase tracking-widest font-medium">
-                  {stat.label}
-                </Text>
-              </motion.div>
+          <div className="h-px w-full mb-10" style={{ background: "var(--theme-card-border)" }} />
+          <div className="flex flex-wrap gap-x-12 gap-y-4">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold tabular-nums" style={{ color: "var(--theme-text-accent)" }}>{stat.value}</span>
+                <span className="text-xs uppercase tracking-widest" style={{ color: "var(--theme-text-primary)", opacity: 0.4 }}>{stat.label}</span>
+              </div>
             ))}
           </div>
-        </motion.section>
+        </motion.div>
 
         {/* ── Calendar section ── */}
         <motion.section

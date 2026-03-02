@@ -15,8 +15,8 @@ export const ExpandOnHover = () => {
   const [expandedImage, setExpandedImage] = useState(2);
 
   return (
-    <div className="w-full flex justify-center py-4 relative z-20">
-      <div className="relative flex w-full max-w-6xl items-center justify-center gap-2">
+    <div className="w-full py-4 relative z-20">
+      <div className="relative flex w-full items-stretch gap-2">
         {images.map((src, idx) => {
           const isExpanded = expandedImage === idx + 1;
           return (
@@ -26,7 +26,7 @@ export const ExpandOnHover = () => {
               className="relative cursor-pointer overflow-hidden rounded-2xl bg-[var(--theme-card-bg)]"
               initial={false}
               animate={{
-                width: isExpanded ? "32rem" : "5rem",
+                flexGrow: isExpanded ? 5 : 1,
               }}
               transition={{
                 type: "spring",
@@ -35,6 +35,9 @@ export const ExpandOnHover = () => {
                 mass: 1,
               }}
               style={{
+                flexShrink: 0,
+                flexBasis: 0,
+                minWidth: 0,
                 height: "24rem",
                 border: "1px solid var(--theme-card-border)",
               }}
@@ -43,12 +46,12 @@ export const ExpandOnHover = () => {
               {src ? (
                 <motion.img
                   layout="position"
-                  className="absolute inset-0 w-full h-full object-cover min-w-[32rem] object-center"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                   src={src}
                   alt={`Event highlight ${idx + 1}`}
                 />
               ) : (
-                <div className="absolute inset-0 min-w-[32rem] bg-[var(--theme-card-bg)]/20 flex flex-col items-center justify-center">
+                <div className="absolute inset-0 bg-[var(--theme-card-bg)]/20 flex flex-col items-center justify-center">
                    {/* Empty state overlay similar to past events page fallback */}
                    <div className="absolute inset-0 bg-linear-to-tl from-[var(--theme-bg)]/40 via-[var(--theme-card-bg)]/10 to-[var(--theme-bg)]/10" />
                    <div className="w-12 h-12 rounded-xl mb-3 flex items-center justify-center border-2 border-[var(--theme-card-border)] bg-[var(--theme-bg)]/50">
