@@ -7,6 +7,7 @@ import CalendarContainer from "./components/calendar/CalendarContainer";
 import { Text } from "./components/ui";
 import { ExpandOnHover } from "./components/ui/expand-cards";
 import { motion } from "framer-motion";
+import { RevealWaveImage } from "./components/ui/reveal-wave-image";
 
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 18 },
@@ -31,102 +32,20 @@ export default function Home() {
 
       <main className="flex-1 relative z-10 font-sans">
 
-        {/* ── Hero ── */}
-        <section className="px-6 sm:px-10 md:px-20 pt-20 sm:pt-28 pb-16 sm:pb-20 flex flex-col items-center text-center max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fade(0)}
-          >
-            <span
-              className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border mb-8"
-              style={{
-                borderColor: "var(--theme-text-accent)",
-                color: "var(--theme-text-accent)",
-                background: "color-mix(in oklab, var(--theme-text-accent) 8%, transparent)",
-              }}
-            >
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full"
-                style={{ background: "var(--theme-text-accent)" }}
-              />
-              Open to all ASU students
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial="hidden"
-            animate="visible"
-            variants={fade(0.06)}
-            className="text-5xl sm:text-6xl xl:text-7xl font-bold leading-[1.04] tracking-tight text-balance mb-6"
-            style={{ color: "var(--theme-text-primary)" }}
-          >
-            Build real things{" "}
-            <br className="hidden sm:block" />
-            with{" "}
-            <span
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--theme-text-accent), color-mix(in oklab, var(--theme-text-accent) 65%, white))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Claude AI
-            </span>{" "}
-            at ASU
-          </motion.h1>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            variants={fade(0.12)}
-            className="text-lg sm:text-xl max-w-2xl leading-relaxed text-balance mb-10"
-            style={{ color: "var(--theme-text-primary)", opacity: 0.65 }}
-          >
-            The ASU Claude Builder Club is where curious students ship
-            production-grade AI apps, attend exclusive workshops, and land
-            real opportunities in tech.
-          </motion.p>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fade(0.18)}
-            className="flex flex-wrap justify-center gap-3"
-          >
-            <Link
-              href="https://discord.gg/PRh8F2XebB"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-umami-event="Hero - Join Discord"
-              className="inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg"
-              style={{
-                background: "var(--theme-button-bg)",
-                color: "var(--theme-button-text)",
-              }}
-            >
-              Join our Discord
-            </Link>
-            <Link
-              href="/past-events"
-              data-umami-event="Hero - Past Events"
-              className="inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold border transition-all duration-200 hover:scale-[1.03]"
-              style={{
-                borderColor: "var(--theme-card-border)",
-                color: "var(--theme-text-primary)",
-                background: "var(--theme-card-bg)",
-              }}
-            >
-              Past Events
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-          </motion.div>
+        {/* ── Hero: RevealWave full-screen ── */}
+        <section className="relative w-full" style={{ height: "calc(100dvh - 56px)" }}>
+          <RevealWaveImage
+            src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop"
+            waveSpeed={0.2}
+            waveFrequency={0.7}
+            waveAmplitude={0.5}
+            revealRadius={0.5}
+            revealSoftness={1}
+            pixelSize={2}
+            mouseRadius={0.4}
+            className="absolute inset-0 w-full h-full"
+          />
         </section>
-
         {/* ── Event Gallery ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
