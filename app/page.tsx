@@ -9,6 +9,7 @@ import { ExpandOnHover } from "./components/ui/expand-cards";
 import { motion } from "framer-motion";
 import { RevealWaveImage } from "./components/ui/reveal-wave-image";
 
+
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 18 },
   visible: {
@@ -35,7 +36,7 @@ export default function Home() {
         {/*reveal wave image*/}
         <section className="relative w-full" style={{ height: "calc(100dvh - 56px)" }}>
           <RevealWaveImage
-            src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop"
+            src="/assets/Claud02.png"
             waveSpeed={0.2}
             waveFrequency={0.7}
             waveAmplitude={0.5}

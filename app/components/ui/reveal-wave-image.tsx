@@ -99,7 +99,7 @@ interface ImagePlaneProps {
 function ImagePlane({ src, aspectRatio, revealRadius, revealSoftness, pixelSize, waveSpeed, waveFrequency, waveAmplitude, mouseRadius, isMouseInCanvas }: ImagePlaneProps) {
   const texture = useTexture(src);
   const meshRef = useRef<THREE.Mesh>(null);
-  const { pointer } = useThree();
+  const { pointer, viewport } = useThree();
   const mouseActiveRef = useRef(0);
   const hasEnteredRef = useRef(false);
 
@@ -118,8 +118,21 @@ function ImagePlane({ src, aspectRatio, revealRadius, revealSoftness, pixelSize,
   }), [texture, revealRadius, revealSoftness, pixelSize, waveSpeed, waveFrequency, waveAmplitude, mouseRadius]);
 
   const scale = useMemo<[number, number, number]>(() => {
-    return aspectRatio > 1 ? [aspectRatio, 1, 1] : [1, 1 / aspectRatio, 1];
-  }, [aspectRatio]);
+    // Determine the viewport aspect ratio
+    const viewportAspect = viewport.width / viewport.height;
+    
+    // Calculate the scale to CONTAIN the image within the viewport.
+    // viewport.width/height in @react-three/fiber represents the visible width/height at z=0.
+    if (viewportAspect > aspectRatio) {
+      // Screen is wider than image. Fit to height.
+      // E.g. Container is 16:9, Image is 4:3. Image height = viewport height. Focus on restricting height.
+      // Plane base size is 2x2. So we scale by viewport height / 2.
+      return [(viewport.height * aspectRatio) / 2, viewport.height / 2, 1];
+    } else {
+      // Screen is taller than image. Fit to width.
+      return [viewport.width / 2, (viewport.width / aspectRatio) / 2, 1];
+    }
+  }, [aspectRatio, viewport.width, viewport.height]);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -185,7 +198,10 @@ export const RevealWaveImage = ({
         <Canvas
           style={{ width: "100%", height: "100%", display: "block" }}
           gl={{ antialias: false }}
-          camera={{ position: [0, 0, 1] }}
+          // By default orthographic camera views from -1 to 1 unless left/right/top/bottom are set.
+          // But R3F handles orthographic scaling cleanly when orthographic={true} is passed.
+          orthographic={true}
+          camera={{ position: [0, 0, 1], zoom: 1 }}
         >
           <ImagePlane
             src={src}
