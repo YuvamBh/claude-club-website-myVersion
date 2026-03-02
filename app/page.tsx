@@ -32,7 +32,7 @@ export default function Home() {
 
       <main className="flex-1 relative z-10 font-sans">
 
-        {/* ── Hero: RevealWave full-screen ── */}
+        {/*reveal wave image*/}
         <section className="relative w-full" style={{ height: "calc(100dvh - 56px)" }}>
           <RevealWaveImage
             src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop"
@@ -47,7 +47,7 @@ export default function Home() {
           />
         </section>
 
-        {/* ── Mission Statement ── */}
+        {/*Mission Statement*/}
         <section className="px-6 sm:px-12 md:px-24 py-24 w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -56,7 +56,7 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 50, damping: 22 }}
             className="max-w-5xl mx-auto"
           >
-            {/* Label */}
+            {/*Label*/}
             <p
               className="text-[11px] font-semibold uppercase tracking-[0.25em] mb-6"
               style={{ color: "var(--theme-text-accent)" }}
@@ -64,7 +64,7 @@ export default function Home() {
               ASU × Anthropic
             </p>
 
-            {/* Big statement */}
+            {/*Big statement*/}
             <h2
               className="text-4xl sm:text-5xl xl:text-6xl font-bold leading-[1.07] tracking-tight text-balance mb-6"
               style={{ color: "var(--theme-text-primary)" }}
@@ -85,28 +85,28 @@ export default function Home() {
               className="text-base sm:text-lg leading-relaxed max-w-2xl mb-16"
               style={{ color: "var(--theme-text-primary)", opacity: 0.55 }}
             >
-              We are ASU's official Anthropic student club. Every semester we run workshops,
-              build sessions, and a 24-hour hackathon — all centred around shipping
+              ASU's official Anthropic student club. We do workshops,
+              build sessions, and a 24-hour hackathon, all centred around shipping
               real things with Claude.
             </p>
 
-            {/* Three value pillars */}
+            {/*Three value pillars*/}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border" style={{ borderColor: "var(--theme-card-border)" }}>
               {[
                 {
                   num: "01",
-                  title: "Everyone ships.",
-                  body: "No passive observers. Every member leaves each session having pushed something real — an app, an agent, a feature.",
-                },
-                {
-                  num: "02",
                   title: "Anthropic-backed.",
                   body: "API credits, Claude Pro access, and direct ties to Anthropic's team. You build on the same model used by companies at scale.",
                 },
                 {
-                  num: "03",
+                  num: "02",
                   title: "Open to everyone.",
-                  body: "CS, design, business, pre-med — if you're curious about AI and want to build things that matter, you belong here.",
+                  body: "CS, design, business, if you're curious about AI and want to build things that matter, you belong here.",
+                },
+                {
+                  num: "03",
+                  title: "Everyone ships.",
+                  body: "No passive observers. Every member leaves each session having pushed something real — an app, an agent, a feature.",
                 },
               ].map((p, i) => (
                 <motion.div
@@ -142,7 +142,7 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* ── Event Gallery ── */}
+        {/*Event Gallery*/}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,7 +152,7 @@ export default function Home() {
           <ExpandOnHover />
         </motion.section>
 
-        {/* ── Stats inline strip ── */}
+        {/*Stats inline strip*/}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -171,7 +171,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* ── Calendar section ── */}
+        {/*Calendar section*/}
         <motion.section
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,7 +184,7 @@ export default function Home() {
                 className="text-[11px] font-semibold uppercase tracking-[0.2em]"
                 style={{ color: "var(--theme-text-accent)" }}
               >
-                Upcoming Events
+                CBC Calendar
               </span>
               <div className="flex-1 h-px" style={{ background: "var(--theme-card-border)" }} />
             </div>
@@ -192,7 +192,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* ── Join CTA strip ── */}
+        {/*Join CTA strip*/}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

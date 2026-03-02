@@ -78,9 +78,9 @@ export default function Footer() {
         }}
       />
 
-      {/* ── Mobile footer: compact bar ── */}
+      {/*Mobile footer: compact bar*/}
       <div className="sm:hidden px-6 py-6 space-y-5">
-        {/* Brand + socials row */}
+        {/*Brand + socials row*/}
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold tracking-wide text-[var(--theme-text-primary)] uppercase">
             ASU Claude Builder Club
@@ -112,7 +112,7 @@ export default function Footer() {
             </Link>
           ))}
         </div>
-        {/* Copyright */}
+        {/*Copyright*/}
         <p className="text-xs text-[var(--theme-text-primary)]/35 pt-1 border-t border-[var(--theme-card-border)]">
           © {new Date().getFullYear()} ASU Claude Builder Club
         </p>
@@ -120,7 +120,7 @@ export default function Footer() {
 
       <div className="hidden sm:block max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 sm:gap-12">
-          {/* Column 1 — Brand */}
+          {/*Column 1 — Brand*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pb-6 sm:pb-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-sm font-bold tracking-wide text-[var(--theme-text-primary)] uppercase">
               ASU Claude Builder Club
@@ -129,7 +129,7 @@ export default function Footer() {
               Building the next generation of AI-native products at Arizona State
               University.
             </p>
-            {/* Social icons */}
+            {/*Social icons*/}
             <div className="flex items-center gap-3 pt-1 justify-center sm:justify-start">
               {socialLinks.map((s) => (
                 <motion.a
@@ -148,7 +148,7 @@ export default function Footer() {
             </div>
           </motion.div>
 
-          {/* Column 2 — Quick Links */}
+          {/*Column 2 — Quick Links*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left py-6 sm:py-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Quick Links
@@ -168,7 +168,7 @@ export default function Footer() {
             </ul>
           </motion.div>
 
-          {/* Column 3 — Sponsor CTA */}
+          {/*Column 3 — Sponsor CTA*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pt-6 sm:pt-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Partner With Us
@@ -190,7 +190,7 @@ export default function Footer() {
           </motion.div>
         </div>
 
-        {/* Bottom bar */}
+        {/*Bottom bar*/}
         <motion.div
           variants={itemVariants}
           className="mt-8 pt-6 border-t border-[var(--theme-card-border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--theme-text-primary)]/40 text-center"

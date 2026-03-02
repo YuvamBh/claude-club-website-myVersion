@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-
-// Placeholders for images to be added later
 const images = [
   "",
   "",
