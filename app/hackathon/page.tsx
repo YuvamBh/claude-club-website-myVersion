@@ -5,12 +5,17 @@ import { useRef, useState, useEffect } from "react";
 import Confetti from "react-confetti-boom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-const Countdown = dynamic(() => import("../components/Countdown"), { ssr: false });
-import { Heading, Text, Card, Button } from "../components/ui";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { showHackathonPromo } from "../theme-config";
+import { Heading, Text, Card, Button } from "../components/ui";
+import Link from "next/link";
+const Countdown = dynamic(() => import("../components/Countdown"), { ssr: false });
+const HackASUPongHero = dynamic(
+  () => import("../components/ui/hackasu-pong-hero").then((m) => m.HackASUPongHero),
+  { ssr: false }
+);
+
 
 const headerVariants = {
   hidden: { opacity: 0, y: -30 },
@@ -986,6 +991,8 @@ function PrizeItem({
 }
 
 export default function Hackathon() {
+  const [hasEntered, setHasEntered] = useState(false);
+
   if (!showHackathonPromo) {
     notFound();
   }
@@ -994,65 +1001,39 @@ export default function Hackathon() {
     <div className="max-h-full flex flex-col">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-20 px-4 sm:px-8 overflow-hidden">
-        <div className="max-w-6xl mx-auto text-center">
-          <motion.div
-            variants={headerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="inline-block mb-4 px-6 py-2 bg-[var(--theme-text-accent)] text-[var(--theme-card-bg)] rounded-full font-bold text-sm tracking-wider">
-              NOVEMBER 8-9, 2025
-            </div>
-            <Heading
-              level="h1"
-              animate={false}
-              className="text-6xl sm:text-7xl md:text-8xl font-black mb-6 leading-none"
-            >
-              <span className="text-[var(--theme-text-primary)]">Hack</span>
-              <span className="text-[var(--theme-text-accent)]">ASU</span>
-            </Heading>
-            <Text
-              size="xl"
-              className="max-w-3xl mx-auto mb-8 text-xl leading-relaxed"
-            >
-              24 hours. Unlimited creativity. Build with Claude AI at ASU&apos;s
-              most innovative hackathon.
-            </Text>
-          </motion.div>
-
-          {/* Countdown */}
-          <div className="mb-8">
-            <Countdown
-              targetDate={new Date("2025-11-08T12:00:00")}
-              endDate={new Date("2025-11-09T12:00:00")}
-            />
-          </div>
-
-          <motion.div
+      {/* ── Pong Hero ── */}
+      {!hasEntered ? (
+        <section className="relative w-full overflow-hidden" style={{ height: "calc(100dvh - 56px)" }}>
+          <HackASUPongHero />
+          {/* Enter Button Overlay */}
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="absolute inset-x-0 bottom-24 flex justify-center pb-8 pointer-events-none z-10"
           >
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/hackathon/signup">
-                <Button size="lg" className="text-lg px-8 py-6">
-                  Register Now
-                </Button>
-              </Link>
-              <div className="text-[var(--theme-text-dark)]">
-                <p className="font-bold">Memorial Union, Pima (230)</p>
-                <p className="text-sm">11 AM Start • Nov 8-9</p>
-              </div>
-            </div>
+            <Button 
+               size="lg" 
+               className="pointer-events-auto px-10 py-5 text-sm uppercase tracking-[0.3em] font-medium bg-transparent text-white/80 hover:text-white border border-white/20 hover:border-white/50 backdrop-blur-sm transition-all duration-500 rounded-none shadow-none hover:bg-white/5" 
+               onClick={() => {
+                 window.scrollTo({ top: 0, behavior: "smooth" });
+                 setHasEntered(true);
+               }}
+            >
+              Explore
+            </Button>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Check-In Logistics Section */}
-      <section className="py-12 px-4 sm:px-8">
-        <div className="max-w-4xl mx-auto">
+        </section>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8, ease: "easeOut" }} 
+          className="flex-1 flex flex-col"
+        >
+          {/* Check-In Logistics Section */}
+          <section className="py-12 px-4 sm:px-8">
+            <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1656,6 +1637,8 @@ export default function Hackathon() {
       </section>
 
       <Footer />
+        </motion.div>
+      )}
     </div>
   );
 }
