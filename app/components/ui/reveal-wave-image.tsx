@@ -118,19 +118,15 @@ function ImagePlane({ src, aspectRatio, revealRadius, revealSoftness, pixelSize,
   }), [texture, revealRadius, revealSoftness, pixelSize, waveSpeed, waveFrequency, waveAmplitude, mouseRadius]);
 
   const scale = useMemo<[number, number, number]>(() => {
-    // Determine the viewport aspect ratio
+    // Cover logic: always scale so the image fills the full viewport (no letterboxing/side bars).
+    // Like CSS object-fit: cover — whichever dimension is "short", stretch to fill it.
     const viewportAspect = viewport.width / viewport.height;
-    
-    // Calculate the scale to CONTAIN the image within the viewport.
-    // viewport.width/height in @react-three/fiber represents the visible width/height at z=0.
     if (viewportAspect > aspectRatio) {
-      // Screen is wider than image. Fit to height.
-      // E.g. Container is 16:9, Image is 4:3. Image height = viewport height. Focus on restricting height.
-      // Plane base size is 2x2. So we scale by viewport height / 2.
-      return [(viewport.height * aspectRatio) / 2, viewport.height / 2, 1];
-    } else {
-      // Screen is taller than image. Fit to width.
+      // Screen is wider than image → fit to WIDTH (image height gets cropped)
       return [viewport.width / 2, (viewport.width / aspectRatio) / 2, 1];
+    } else {
+      // Screen is taller than image → fit to HEIGHT (image sides get cropped)
+      return [(viewport.height * aspectRatio) / 2, viewport.height / 2, 1];
     }
   }, [aspectRatio, viewport.width, viewport.height]);
 
