@@ -40,6 +40,10 @@ export default function About() {
       <Header />
 
       <main className="flex-1 font-sans relative z-10">
+        {/* Glow blobs */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 w-[500px] h-[500px] rounded-full opacity-20 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full opacity-15 blur-[90px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+
 
         {/*Hero*/}
         <section className="px-6 flex flex-col items-center justify-center min-h-[70vh] max-w-4xl mx-auto text-center">

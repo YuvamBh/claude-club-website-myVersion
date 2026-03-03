@@ -998,7 +998,12 @@ export default function Hackathon() {
   }
 
   return (
-    <div className="max-h-full flex flex-col">
+    <div className="max-h-full flex flex-col relative overflow-hidden">
+      {/* Glow blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 w-[560px] h-[560px] rounded-full opacity-20 blur-[110px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute top-1/3 -left-32 w-[420px] h-[420px] rounded-full opacity-12 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 w-[400px] h-[400px] rounded-full opacity-15 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+
       <Header />
 
       {/* ── Pong Hero ── */}

@@ -189,8 +189,11 @@ export default function PastEventsPage() {
   for (let i = range.min; i <= range.max; i++) indices.push(i);
 
   return (
-    //overflow:hidden
     <div style={{ height: "100dvh", overflow: "hidden", position: "relative" }}>
+      {/* Glow blobs */}
+      <div aria-hidden style={{ pointerEvents: "none", position: "absolute", top: "-96px", right: "-96px", width: "480px", height: "480px", borderRadius: "9999px", opacity: 0.2, filter: "blur(100px)", background: "radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)", zIndex: 0 }} />
+      <div aria-hidden style={{ pointerEvents: "none", position: "absolute", bottom: "-96px", left: "-96px", width: "380px", height: "380px", borderRadius: "9999px", opacity: 0.15, filter: "blur(90px)", background: "radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)", zIndex: 0 }} />
+
 
       {/*Sticky header*/}
       <Header />

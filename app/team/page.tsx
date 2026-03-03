@@ -83,6 +83,11 @@ export default function TeamPage() {
       <TeamMemberModal member={activeMember} onClose={() => setActiveMember(null)} />
 
       <div className="font-sans relative z-10">
+        {/* Glow blobs */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 w-[550px] h-[550px] rounded-full opacity-20 blur-[110px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+        <div aria-hidden className="pointer-events-none absolute top-1/2 -left-32 w-[400px] h-[400px] rounded-full opacity-12 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+        <div aria-hidden className="pointer-events-none absolute -bottom-16 -right-16 w-[360px] h-[360px] rounded-full opacity-15 blur-[90px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+
         {/* ── Hero ── */}
         <div className="px-8 sm:px-20 pt-16 pb-12 max-w-7xl mx-auto">
           <motion.div

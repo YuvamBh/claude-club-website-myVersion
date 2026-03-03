@@ -46,6 +46,30 @@ export default function RootLayout({
           forcedTheme="dark"
           disableTransitionOnChange
         >
+          {/* ── Sitewide ambient glow ── fixed so it spans every page ── */}
+          <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+            {/* Top-right warm blob */}
+            <div
+              className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
+              style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 65%)' }}
+            />
+            {/* Top-left cool accent blob */}
+            <div
+              className="absolute -top-16 -left-16 w-[420px] h-[420px] rounded-full opacity-10 blur-[100px]"
+              style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 65%)' }}
+            />
+            {/* Bottom-left warm blob */}
+            <div
+              className="absolute -bottom-32 -left-24 w-[500px] h-[500px] rounded-full opacity-15 blur-[110px]"
+              style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 65%)' }}
+            />
+            {/* Bottom-right subtle blob */}
+            <div
+              className="absolute -bottom-16 -right-16 w-[360px] h-[360px] rounded-full opacity-10 blur-[90px]"
+              style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 65%)' }}
+            />
+          </div>
+
           {children}
           {/* <DarkModeToggle /> */}
           <Analytics />

@@ -49,7 +49,19 @@ export default function Home() {
         </section>
 
         {/*Mission Statement*/}
-        <section className="px-6 sm:px-12 md:px-24 py-24 w-full">
+        <section className="relative px-6 sm:px-12 md:px-24 py-24 w-full overflow-hidden">
+          {/*Ambient glow blobs*/}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-32 -top-16 w-[500px] h-[500px] rounded-full opacity-25 blur-3xl"
+            style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-24 bottom-0 w-[360px] h-[360px] rounded-full opacity-15 blur-3xl"
+            style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }}
+          />
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

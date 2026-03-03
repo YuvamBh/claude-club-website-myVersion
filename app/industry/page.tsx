@@ -82,7 +82,11 @@ const fadeUp = {
 
 export default function IndustryPage() {
   return (
-    <div className="min-h-[100dvh] relative overflow-x-hidden">
+    <div className="min-h-dvh relative">
+      {/* Glow blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full opacity-20 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-15 blur-[90px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+
       <Header />
       <main className="pb-24 pt-12 sm:pt-16">
         <Container size="lg" animate className="space-y-12">

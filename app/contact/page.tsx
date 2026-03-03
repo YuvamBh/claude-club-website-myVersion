@@ -126,7 +126,11 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] relative overflow-x-hidden">
+    <div className="min-h-dvh relative">
+      {/* Glow blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 w-[480px] h-[480px] rounded-full opacity-20 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 w-[380px] h-[380px] rounded-full opacity-15 blur-[90px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
+
       <Header />
       <main className="py-12 sm:py-16">
         <Container size="md" animate>
