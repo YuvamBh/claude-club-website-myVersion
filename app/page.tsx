@@ -10,6 +10,8 @@ import { motion } from "framer-motion";
 import { RevealWaveImage } from "./components/ui/reveal-wave-image";
 
 
+import { useState, useEffect, useRef } from "react";
+
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 18 },
   visible: {
@@ -19,12 +21,53 @@ const fade = (delay = 0) => ({
   },
 });
 
-const stats = [
-  { value: "200+", label: "Active Members" },
-  { value: "15+", label: "Events Hosted" },
-  { value: "6+", label: "Sponsors" },
-  { value: "24h", label: "Hackathon" },
-];
+function CountUp({ target, suffix }: { target: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    let frame: number;
+    const duration = 1200;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+      setCount(Math.round(eased * target));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [started, target]);
+
+  return (
+    <span
+      ref={ref}
+      className="text-4xl font-black tabular-nums leading-none"
+      style={{
+        background: "linear-gradient(135deg, var(--theme-text-accent) 0%, color-mix(in oklab, var(--theme-text-accent) 60%, white) 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }}
+    >
+      {count}{suffix}
+    </span>
+  );
+}
+
 
 export default function Home() {
   return (
@@ -165,24 +208,52 @@ export default function Home() {
           <ExpandOnHover />
         </motion.section>
 
-        {/*Stats inline strip*/}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="px-6 sm:px-12 md:px-24 pb-16 max-w-5xl mx-auto w-full"
-        >
-          <div className="h-px w-full mb-10" style={{ background: "var(--theme-card-border)" }} />
-          <div className="flex flex-wrap gap-x-12 gap-y-4">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tabular-nums" style={{ color: "var(--theme-text-accent)" }}>{stat.value}</span>
-                <span className="text-xs uppercase tracking-widest" style={{ color: "var(--theme-text-primary)", opacity: 0.4 }}>{stat.label}</span>
-              </div>
+        {/*Stats section — premium cards*/}
+        <section className="relative px-6 sm:px-12 md:px-24 pb-20 max-w-5xl mx-auto w-full">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { value: 200, suffix: "+", label: "Active Members", sub: "Students building with Claude" },
+              { value: 15,  suffix: "+", label: "Events Hosted",  sub: "Workshops, talks & build nights" },
+              { value: 6,   suffix: "+", label: "Sponsors",       sub: "Industry partners & supporters" },
+              { value: 24,  suffix: "h", label: "Hackathon",      sub: "24 hours of building & shipping" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ type: "spring", stiffness: 55, damping: 22, delay: i * 0.07 }}
+                className="relative flex flex-col gap-2 rounded-2xl p-6 border overflow-hidden"
+                style={{
+                  background: "color-mix(in oklab, var(--theme-card-bg) 80%, transparent)",
+                  borderColor: "var(--theme-card-border)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {/*Accent top bar*/}
+                <div
+                  className="absolute inset-x-0 top-0 h-[2px]"
+                  style={{ background: "linear-gradient(90deg, var(--theme-text-accent), transparent)" }}
+                />
+                {/*Corner glow*/}
+                <div
+                  className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-30 blur-2xl"
+                  style={{ background: "var(--theme-text-accent)" }}
+                />
+                {/*Large animated number*/}
+                <CountUp target={s.value} suffix={s.suffix} />
+                {/*Label + sub*/}
+                <p className="text-sm font-semibold leading-tight" style={{ color: "var(--theme-text-primary)" }}>
+                  {s.label}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--theme-text-primary)", opacity: 0.45 }}>
+                  {s.sub}
+                </p>
+              </motion.div>
             ))}
           </div>
-        </motion.div>
+        </section>
+
 
         {/*Calendar section*/}
         <motion.section
