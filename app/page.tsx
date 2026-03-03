@@ -180,7 +180,7 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="relative px-6 sm:px-10 md:px-20 pb-28 pt-8 overflow-hidden"
         >
-          {/* Ambient glow blobs */}
+          {/*Ambient glow blobs*/}
           <div
             aria-hidden
             className="pointer-events-none absolute -left-32 top-0 w-[480px] h-[480px] rounded-full opacity-30 blur-3xl"
@@ -194,7 +194,7 @@ export default function Home() {
 
           <div className="relative max-w-5xl mx-auto">
 
-            {/* Section header */}
+            {/*Section header*/}
             <motion.div
               initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -202,7 +202,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 50, damping: 22 }}
               className="mb-12"
             >
-              {/* Label row */}
+              {/*Label row*/}
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-1.5 h-1.5 rounded-full"
@@ -217,7 +217,7 @@ export default function Home() {
                 <div className="flex-1 h-px" style={{ background: 'var(--theme-card-border)' }} />
               </div>
 
-              {/* Big headline */}
+              {/*Big headline*/}
               <h2
                 className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.08] mb-4"
                 style={{ color: 'var(--theme-text-primary)' }}
@@ -238,11 +238,11 @@ export default function Home() {
                 className="text-sm leading-relaxed max-w-md"
                 style={{ color: 'var(--theme-text-primary)', opacity: 0.5 }}
               >
-                Workshops, build sessions, and hackathons — all in one place. Subscribe to stay in the loop.
+                Workshops, build sessions, and hackathons, all in one place! Subscribe to stay in the loop.
               </p>
             </motion.div>
 
-            {/* Calendar — slides up after headline */}
+            {/*Calendar*/}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
