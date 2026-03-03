@@ -174,24 +174,87 @@ export default function Home() {
 
         {/*Calendar section*/}
         <motion.section
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 50, damping: 22, delay: 0.4 }}
-          className="px-6 sm:px-10 md:px-20 pb-20"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.6 }}
+          className="relative px-6 sm:px-10 md:px-20 pb-28 pt-8 overflow-hidden"
         >
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-6 flex items-center gap-3">
-              <span
-                className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                style={{ color: "var(--theme-text-accent)" }}
+          {/* Ambient glow blobs */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 top-0 w-[480px] h-[480px] rounded-full opacity-30 blur-3xl"
+            style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 bottom-0 w-[360px] h-[360px] rounded-full opacity-20 blur-3xl"
+            style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }}
+          />
+
+          <div className="relative max-w-5xl mx-auto">
+
+            {/* Section header */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ type: "spring", stiffness: 50, damping: 22 }}
+              className="mb-12"
+            >
+              {/* Label row */}
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: 'var(--theme-text-accent)' }}
+                />
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.25em]"
+                  style={{ color: 'var(--theme-text-accent)' }}
+                >
+                  CBC Calendar
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--theme-card-border)' }} />
+              </div>
+
+              {/* Big headline */}
+              <h2
+                className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.08] mb-4"
+                style={{ color: 'var(--theme-text-primary)' }}
               >
-                CBC Calendar
-              </span>
-              <div className="flex-1 h-px" style={{ background: "var(--theme-card-border)" }} />
-            </div>
-            <CalendarContainer className="w-full" />
+                Never miss{" "}
+                <span
+                  style={{
+                    background: "linear-gradient(120deg, var(--theme-text-accent) 0%, color-mix(in oklab, var(--theme-text-accent) 55%, white) 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  an event.
+                </span>
+              </h2>
+              <p
+                className="text-sm leading-relaxed max-w-md"
+                style={{ color: 'var(--theme-text-primary)', opacity: 0.5 }}
+              >
+                Workshops, build sessions, and hackathons — all in one place. Subscribe to stay in the loop.
+              </p>
+            </motion.div>
+
+            {/* Calendar — slides up after headline */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ type: "spring", stiffness: 45, damping: 22, delay: 0.15 }}
+            >
+              <CalendarContainer className="w-full" />
+            </motion.div>
+
           </div>
         </motion.section>
+
 
         {/*Join CTA strip*/}
         <motion.section

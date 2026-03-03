@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CalendarDay as CalendarDayType, CalendarEvent } from '@/types/calendar';
-import { truncateEventSummary } from '@/lib/calendar/utils';
+import { motion } from 'framer-motion';
 
 interface CalendarDayProps {
   day: CalendarDayType;
@@ -14,65 +14,68 @@ export default function CalendarDay({ day, onSelect, onEventClick }: CalendarDay
   const dayNumber = day.date.getDate();
   const isCurrentMonth = day.isCurrentMonth;
   const isToday = day.isToday;
-  const isSelected = day.isSelected;
   const hasEvents = day.hasEvents;
+  const eventCount = day.events?.length ?? 0;
 
   const handleDayClick = () => {
-    if (hasEvents && day.events.length > 0 && onEventClick) {
-      // If day has events, show the first event's details
+    if (hasEvents && eventCount > 0 && onEventClick) {
       onEventClick(day.events[0]);
     } else {
-      // Otherwise, just select the day
       onSelect();
     }
   };
 
-  const baseClasses = `
-    h-20 rounded-lg cursor-pointer transition-all duration-200
-    flex flex-col items-center justify-start relative
-    hover:bg-[var(--theme-text-accent)]/10
-    ${hasEvents ? 'bg-[var(--theme-text-accent)]/60 hover:bg-[var(--theme-text-accent)]/80' : ''}
-    ${isCurrentMonth && !hasEvents ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-primary)]/40'}
-    ${hasEvents ? 'text-white' : ''}
-    ${isToday && !hasEvents ? 'ring-2 ring-[var(--theme-text-accent)] bg-[var(--theme-text-accent)]/10' : ''}
-    ${isSelected && !hasEvents ? `${isToday ? '' : 'ring-2 ring-[var(--theme-text-accent)]/50'} bg-[var(--theme-text-accent)]/5` : ''}
-  `;
-
   return (
-    <div
-      className={baseClasses}
+    <motion.div
+      whileHover={{ scale: isCurrentMonth ? 1.05 : 1 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className={`
+        relative min-h-[44px] rounded-xl cursor-pointer
+        flex flex-col items-center justify-start pt-1.5 pb-1 px-1
+        transition-all duration-200
+        ${!isCurrentMonth ? 'opacity-25' : ''}
+        ${isToday
+          ? 'ring-2 ring-[var(--theme-text-accent)] ring-offset-0'
+          : hasEvents
+          ? 'hover:ring-1 hover:ring-[var(--theme-text-accent)]/40'
+          : 'hover:bg-[var(--theme-text-accent)]/8'}
+        ${hasEvents ? 'bg-[var(--theme-gradient-accent)]' : ''}
+      `}
       onClick={handleDayClick}
       role="button"
-      tabIndex={0}
-      aria-label={`${day.date.toLocaleDateString()}${hasEvents ? `, ${day.events.length} events - click to view details` : ''}`}
+      tabIndex={isCurrentMonth ? 0 : -1}
+      aria-label={`${day.date.toLocaleDateString()}${hasEvents ? `, ${eventCount} events` : ''}`}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleDayClick();
-        }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDayClick(); }
       }}
     >
       {/* Day number */}
-      <div className={`text-sm font-medium mb-1 pl-2 self-start ${hasEvents ? 'text-white' : ''}`}>
+      <span
+        className={`text-xs font-semibold tabular-nums leading-none
+          ${isToday ? 'text-[var(--theme-text-accent)]' : 'text-[var(--theme-text-primary)]'}
+        `}
+      >
         {dayNumber}
-      </div>
+      </span>
 
-      {/* Events - only show if no events (for days without events) */}
-      {!hasEvents && (
-        <div className="flex-1 w-full">
-          {/* Empty space for days without events */}
+      {/* Event dots */}
+      {hasEvents && isCurrentMonth && (
+        <div className="flex gap-[3px] mt-1.5">
+          {Array.from({ length: Math.min(eventCount, 3) }).map((_, i) => (
+            <span
+              key={i}
+              className="w-[5px] h-[5px] rounded-full"
+              style={{ background: 'var(--theme-text-accent)' }}
+            />
+          ))}
+          {eventCount > 3 && (
+            <span className="text-[8px] font-bold leading-[5px]" style={{ color: 'var(--theme-text-accent)' }}>
+              +{eventCount - 3}
+            </span>
+          )}
         </div>
       )}
-
-      {/* Event content - always show the first event's summary when events exist */}
-      {hasEvents && (
-        <div className="absolute inset-0 flex items-center justify-center px-1">
-          <div className="text-white text-[10px] font-medium text-center leading-tight max-w-full overflow-hidden">
-            {truncateEventSummary(day.events[0].summary, 30)}
-          </div>
-        </div>
-      )}
-
-    </div>
+    </motion.div>
   );
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { getMonthName } from '@/lib/calendar/utils';
-import { Heading } from '../ui';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -19,81 +19,98 @@ export default function CalendarHeader({
   onGoToToday,
   isLoading = false,
 }: CalendarHeaderProps) {
-  const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [monthKey, setMonthKey] = useState(0);
 
-  const handleButtonClick = (action: () => void, buttonType: string) => {
-    setActiveButton(buttonType);
-    action();
-    // Reset active state after a short delay
-    setTimeout(() => setActiveButton(null), 200);
-  };
   const monthName = getMonthName(currentDate.getMonth());
+  const year = currentDate.getFullYear();
+  const isCurrentMonth =
+    currentDate.getMonth() === new Date().getMonth() &&
+    currentDate.getFullYear() === new Date().getFullYear();
+
+  const handlePrev = () => {
+    setMonthKey(k => k - 1);
+    onPreviousMonth();
+  };
+  const handleNext = () => {
+    setMonthKey(k => k + 1);
+    onNextMonth();
+  };
 
   return (
-    <div className="flex items-center justify-between mb-6">
-      {/* Month Only */}
-      <Heading level="h2" animate={false} className="min-w-[120px]">
-        {monthName}
-      </Heading>
-
-      {/* Navigation Controls */}
-      <div className="flex items-center gap-4">
-        {/* Previous Month Button */}
-        <button
-          onClick={() => handleButtonClick(onPreviousMonth, 'prev')}
-          disabled={isLoading}
-          className={`p-2 rounded-full hover:bg-[var(--theme-text-accent)]/20 hover:scale-110 hover:shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed ${
-            activeButton === 'prev' ? 'bg-[var(--theme-text-accent)] scale-110 shadow-md text-white' : ''
-          }`}
-          aria-label="Previous month"
-        >
-          <svg
-            className={`w-5 h-5 ${activeButton === 'prev' ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <div className="flex items-center justify-between mb-5">
+      {/*Month/Year*/}
+      <div className="flex items-baseline gap-2 overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={monthKey}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="text-xl font-bold tracking-tight"
+            style={{ color: 'var(--theme-text-primary)' }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+            {monthName}
+          </motion.span>
+        </AnimatePresence>
+        <span
+          className="text-base font-medium"
+          style={{ color: 'var(--theme-text-accent)', opacity: 0.7 }}
+        >
+          {year}
+        </span>
+      </div>
+
+      {/*Controls*/}
+      <div className="flex items-center gap-1.5">
+        {/*Today pill*/}
+        {!isCurrentMonth && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={onGoToToday}
+            disabled={isLoading}
+            className="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 disabled:opacity-40"
+            style={{
+              background: 'var(--theme-gradient-accent)',
+              color: 'var(--theme-text-accent)',
+              border: '1px solid var(--theme-text-accent)',
+            }}
+          >
+            Today
+          </motion.button>
+        )}
+
+        {/*Prev*/}
+        <button
+          onClick={handlePrev}
+          disabled={isLoading}
+          aria-label="Previous month"
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-40 hover:scale-110"
+          style={{
+            background: 'var(--theme-gradient-accent)',
+            color: 'var(--theme-text-accent)',
+          }}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
-        {/* Today Button */}
+        {/*Next*/}
         <button
-          onClick={() => handleButtonClick(onGoToToday, 'today')}
+          onClick={handleNext}
           disabled={isLoading}
-          className={`px-4 py-2 text-sm font-medium hover:bg-[var(--theme-text-accent)]/20 hover:scale-105 hover:shadow-md rounded-full transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed ${
-            activeButton === 'today' ? 'bg-[var(--theme-text-accent)] scale-105 shadow-md text-white' : 'text-[var(--theme-text-primary)]'
-          }`}
-        >
-          Today
-        </button>
-
-        {/* Next Month Button */}
-        <button
-          onClick={() => handleButtonClick(onNextMonth, 'next')}
-          disabled={isLoading}
-          className={`p-2 rounded-full hover:bg-[var(--theme-text-accent)]/20 hover:scale-110 hover:shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed ${
-            activeButton === 'next' ? 'bg-[var(--theme-text-accent)] scale-110 shadow-md text-white' : ''
-          }`}
           aria-label="Next month"
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-40 hover:scale-110"
+          style={{
+            background: 'var(--theme-gradient-accent)',
+            color: 'var(--theme-text-accent)',
+          }}
         >
-          <svg
-            className={`w-5 h-5 ${activeButton === 'next' ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
