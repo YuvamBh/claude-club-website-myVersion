@@ -182,13 +182,24 @@ export default function CalendarContainer({ className = '' }: CalendarContainerP
 
           {/* Event list */}
           {calendarState.isLoading ? (
-            <div className="space-y-3 animate-pulse">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ background: 'var(--theme-gradient-accent)' }} />
-                  <div className="flex-1 space-y-1.5 pt-1">
-                    <div className="h-2.5 w-3/4 rounded" style={{ background: 'var(--theme-text-primary)', opacity: 0.12 }} />
-                    <div className="h-2 w-1/2 rounded" style={{ background: 'var(--theme-text-primary)', opacity: 0.08 }} />
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  {/* Date chip shimmer */}
+                  <div
+                    className="cal-shimmer-cell w-10 h-10 rounded-lg shrink-0"
+                    style={{ animationDelay: `${i * 80}ms`, opacity: 0.5 + i * 0.05 }}
+                  />
+                  {/* Text lines shimmer */}
+                  <div className="flex-1 space-y-2 pt-1">
+                    <div
+                      className="cal-shimmer-cell h-2.5 rounded-full"
+                      style={{ width: `${70 - i * 5}%`, animationDelay: `${i * 80 + 40}ms`, opacity: 0.6 }}
+                    />
+                    <div
+                      className="cal-shimmer-cell h-2 rounded-full"
+                      style={{ width: `${45 - i * 3}%`, animationDelay: `${i * 80 + 80}ms`, opacity: 0.4 }}
+                    />
                   </div>
                 </div>
               ))}
