@@ -133,7 +133,7 @@ export default function ContactPage() {
 
       <Header />
       <main className="py-12 sm:py-16">
-        <Container size="md" animate>
+        <Container size="xl" animate>
           <div className="mb-10 text-center space-y-4">
             <Heading level="h1" animate={false}>
               Contact Our Team

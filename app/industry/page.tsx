@@ -89,7 +89,7 @@ export default function IndustryPage() {
 
       <Header />
       <main className="pb-24 pt-12 sm:pt-16">
-        <Container size="lg" animate className="space-y-12">
+        <Container size="xl" animate className="space-y-12">
           <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
             <motion.div
               initial="hidden"

@@ -89,7 +89,7 @@ export default function TeamPage() {
         <div aria-hidden className="pointer-events-none absolute -bottom-16 -right-16 w-[360px] h-[360px] rounded-full opacity-15 blur-[90px]" style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }} />
 
         {/* ── Hero ── */}
-        <div className="px-8 sm:px-20 pt-16 pb-12 max-w-7xl mx-auto">
+        <div className="px-4 sm:px-8 pt-16 pb-12 max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
             animate="visible"

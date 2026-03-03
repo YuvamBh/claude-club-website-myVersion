@@ -92,7 +92,7 @@ export default function Home() {
         </section>
 
         {/*Mission Statement*/}
-        <section className="relative px-6 sm:px-12 md:px-24 py-24 w-full overflow-hidden">
+        <section className="relative px-4 sm:px-8 md:px-16 py-24 w-full overflow-hidden">
           {/*Ambient glow blobs*/}
           <div
             aria-hidden
@@ -110,7 +110,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ type: "spring", stiffness: 50, damping: 22 }}
-            className="max-w-5xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
             {/*Label*/}
             <p
@@ -208,9 +208,79 @@ export default function Home() {
           <ExpandOnHover />
         </motion.section>
 
+        {/*Why Come section*/}
+        <section className="relative px-4 sm:px-8 md:px-16 pt-16 pb-10 w-full">
+          {/* Section label + headline */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ type: "spring", stiffness: 50, damping: 22 }}
+            className="max-w-7xl mx-auto mb-10"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] mb-3" style={{ color: "var(--theme-text-accent)" }}>
+              Why Show Up
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold leading-tight max-w-xl" style={{ color: "var(--theme-text-primary)" }}>
+              Every event is a chance to{" "}
+              <span style={{
+                background: "linear-gradient(120deg, var(--theme-text-accent) 0%, color-mix(in oklab, var(--theme-text-accent) 55%, white) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                build something real.
+              </span>
+            </h2>
+          </motion.div>
+
+          {/* Benefit cards */}
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                emoji: "🧠",
+                title: "Learn by doing",
+                body: "No slides, no theory. Every session ends with something shipped — an app, an agent, or a working prototype using Claude.",
+              },
+              {
+                emoji: "🤝",
+                title: "Meet your people",
+                body: "Find engineers, designers, and founders who are as obsessed with AI as you are. Your next collaborator is in the room.",
+              },
+              {
+                emoji: "🚀",
+                title: "Access Anthropic resources",
+                body: "Free API credits, Claude Pro access, and direct lines to Anthropic's team — perks that only exist because you showed up.",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ type: "spring", stiffness: 55, damping: 22, delay: i * 0.08 }}
+                className="relative flex flex-col gap-3 rounded-2xl p-6 border overflow-hidden group"
+                style={{
+                  background: "color-mix(in oklab, var(--theme-card-bg) 75%, transparent)",
+                  borderColor: "var(--theme-card-border)",
+                }}
+              >
+                {/* Accent line */}
+                <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: "linear-gradient(90deg, var(--theme-text-accent), transparent)" }} />
+                {/* Hover glow */}
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" style={{ background: "radial-gradient(circle at 20% 20%, color-mix(in oklab, var(--theme-text-accent) 6%, transparent), transparent 70%)" }} />
+
+                <span className="text-3xl">{item.emoji}</span>
+                <h3 className="text-base font-bold" style={{ color: "var(--theme-text-primary)" }}>{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--theme-text-primary)", opacity: 0.55 }}>{item.body}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
         {/*Stats section — premium cards*/}
-        <section className="relative px-6 sm:px-12 md:px-24 pb-20 max-w-5xl mx-auto w-full">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="relative px-4 sm:px-8 md:px-16 pb-20 w-full">
+          <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { value: 200, suffix: "+", label: "Active Members", sub: "Students building with Claude" },
               { value: 15,  suffix: "+", label: "Events Hosted",  sub: "Workshops, talks & build nights" },
@@ -261,7 +331,7 @@ export default function Home() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.6 }}
-          className="relative px-6 sm:px-10 md:px-20 pb-28 pt-8 overflow-hidden"
+          className="relative px-4 sm:px-8 md:px-16 pb-28 pt-8 overflow-hidden"
         >
           {/*Ambient glow blobs*/}
           <div
@@ -275,7 +345,7 @@ export default function Home() {
             style={{ background: 'radial-gradient(circle, var(--theme-text-accent) 0%, transparent 70%)' }}
           />
 
-          <div className="relative max-w-5xl mx-auto">
+          <div className="relative max-w-7xl mx-auto">
 
             {/*Section header*/}
             <motion.div

@@ -46,7 +46,7 @@ export default function About() {
 
 
         {/*Hero*/}
-        <section className="px-6 flex flex-col items-center justify-center min-h-[70vh] max-w-4xl mx-auto text-center">
+        <section className="px-4 sm:px-8 flex flex-col items-center justify-center min-h-[70vh] max-w-6xl mx-auto text-center">
           <div className="mb-4">
             <span
               className="text-[11px] font-semibold uppercase tracking-[0.2em]"
