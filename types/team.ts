@@ -52,21 +52,6 @@ export const teamMembers: TeamMember[] = [
     websiteUrl: "https://tet.moe/",
   },
   {
-    id: "sebastian",
-    name: "Sebastian Abundis",
-    position: "Technology",
-    image: "/staff/claude.svg",
-  },
-  {
-    id: "ekagra",
-    name: "Ekagra",
-    position: "Technology",
-    image: "/staff/ekagra.png",
-    websiteUrl: "https://ekagragupta.com/",
-    description:
-      "I'm a senior studying Computer Science @ASU. Incoming intern @Google. My interest lies in Distributed Systems and Machine Learning.",
-  },
-  {
     id: "ben",
     name: "Ben Juntilla",
     position: "Head of Operations",
@@ -86,15 +71,6 @@ export const teamMembers: TeamMember[] = [
     linkedinUrl: "https://www.linkedin.com/in/anirudh-manjesh-978ba5194/",
     description:
       "Computer Science senior at ASU’s Barrett Honors College, experienced in full-stack development, AI/ML, and accessibility technology research. Passionate about building agentic AI systems, collaborating on open source projects, and optimizing technology for real-world impact. Active in hackathons and technical conferences, with a proven track record in deploying machine learning solutions and leading research initiatives. Always exploring new ways to advance software, mentor peers, and make technology more inclusive.",
-  },
-  {
-    id: "joana",
-    name: "Joana Choong",
-    position: "Community Outreach",
-    description:
-      "Sophomore, major in CS . Beyond coding , I actively engage in multidisciplinary project to explore how coding connect with real world challenges.",
-    image: "/staff/joana.png",
-    linkedinUrl: "https://www.linkedin.com/in/joana-choong-8595b1285/",
   },
   {
     id: "erick",
@@ -143,3 +119,30 @@ export const teamMembers: TeamMember[] = [
     return 0;
   }
 );
+
+export const formerMembers: TeamMember[] = [
+  {
+    id: "ekagra",
+    name: "Ekagra",
+    position: "Technology",
+    image: "/staff/ekagra.png",
+    websiteUrl: "https://ekagragupta.com/",
+    description:
+      "I'm a senior studying Computer Science @ASU. Incoming intern @Google. My interest lies in Distributed Systems and Machine Learning.",
+  },
+  {
+    id: "joana",
+    name: "Joana Choong",
+    position: "Community Outreach",
+    description:
+      "Sophomore, major in CS . Beyond coding , I actively engage in multidisciplinary project to explore how coding connect with real world challenges.",
+    image: "/staff/joana.png",
+    linkedinUrl: "https://www.linkedin.com/in/joana-choong-8595b1285/",
+  },
+  {
+    id: "sebastian",
+    name: "Sebastian Abundis",
+    position: "Technology",
+    image: "/staff/claude.svg",
+  },
+];

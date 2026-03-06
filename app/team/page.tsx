@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiHash } from "react-icons/fi";
-import { TeamMember, teamMembers } from "../../types/team";
+import { TeamMember, formerMembers, teamMembers } from "../../types/team";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { TeamMemberCard } from "../components/Team/TeamMemberCard";
@@ -101,6 +101,7 @@ export default function TeamPage() {
   const [activeMember, setActiveMember] = useState<TeamMember["id"] | null>(
     null,
   );
+  const [formerOpen, setFormerOpen] = useState(false);
   const { copyToClipboard } = useCopyUrlWithHash();
 
   return (
@@ -155,6 +156,69 @@ export default function TeamPage() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Former Officers Section */}
+          <div className="mt-16">
+            <div className="text-center mb-2 flex flex-col items-center">
+              <button
+                onClick={() => setFormerOpen((o) => !o)}
+                className="group inline-flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                <Heading level="h2" animate={false}>
+                  Former Officers
+                </Heading>
+                <motion.span
+                  animate={{ rotate: formerOpen ? 180 : 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  className="text-[var(--theme-text-accent)] mt-1"
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M5 7.5L10 12.5L15 7.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.span>
+              </button>
+            </div>
+            <motion.div
+              initial={false}
+              animate={
+                formerOpen
+                  ? { height: "auto", opacity: 1 }
+                  : { height: 0, opacity: 0 }
+              }
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
+              style={{ overflow: "hidden" }}
+            >
+              <Text size="lg" variant="secondary" className="max-w-2xl text-center mx-auto mb-8">
+                We're grateful for the contributions of our former officers.
+              </Text>
+              <motion.div
+                variants={gridContainerVariants}
+                initial="hidden"
+                animate={formerOpen ? "visible" : "hidden"}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-12"
+              >
+                {formerMembers.map((member) => (
+                  <motion.div
+                    key={member.id}
+                    variants={cardVariants}
+                    className={activeMember === member.id ? "z-20" : ""}
+                  >
+                    <TeamMemberCard
+                      member={member}
+                      activeMember={activeMember}
+                      setActiveMember={setActiveMember}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          </div>
 
           {/* Open Source Contributors Section */}
           <div className="mt-20" id="open-source-contributors">
