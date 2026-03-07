@@ -54,7 +54,7 @@ export const teamMembers: TeamMember[] = [
     id: "yuvam",
     name: "Yuvam Bhargav",
     position: "Technology",
-    image: "/staff/yuvam.png",
+    image: "/staff/claude.svg",
     linkedinUrl: "https://www.linkedin.com/in/yuvam-bh/",
     websiteUrl: "https://yuvambhargav.com/",
   },
