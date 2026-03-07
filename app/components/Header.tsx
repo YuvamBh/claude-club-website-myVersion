@@ -17,7 +17,7 @@ export default function Header() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Keyboard shortcut for command menu
+  //Keyboard shortcut for command menu
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -30,7 +30,7 @@ export default function Header() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Only animate on first visit
+  //Only animate on first visit
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function Header() {
     <header className="w-full mesh-background-header top-0 sticky z-50 backdrop-blur-md border-b border-[var(--theme-card-border)]">
       <div className="px-6 sm:px-8 lg:px-12 relative z-20">
         <div className="flex items-center justify-between h-14 overflow-visible">
-          {/* Logo on the left */}
+          {/*Logo on the left*/}
           <motion.div
             initial={{ opacity: hasAnimated ? 1 : 0, x: hasAnimated ? 0 : -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -115,7 +115,7 @@ export default function Header() {
             </Link>
           </motion.div>
 
-          {/* Desktop nav */}
+          {/*Desktop nav*/}
           <nav className="hidden lg:flex items-center gap-1 overflow-visible">
             {navigationItems.map((item, index) => {
               const isDefault = item.variant === "default" || !item.variant;
@@ -159,7 +159,7 @@ export default function Header() {
               );
             })}
 
-            {/* Search button */}
+            {/*Search button*/}
             <motion.div custom={navigationItems.length} initial="hidden" animate="visible" variants={navItemVariants}>
               <button
                 onClick={() => setIsCommandMenuOpen(true)}
@@ -174,7 +174,7 @@ export default function Header() {
             </motion.div>
           </nav>
 
-          {/* Mobile menu button and command menu button */}
+          {/*Mobile menu button and command menu button*/}
           <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={() => setIsCommandMenuOpen(true)}
@@ -235,7 +235,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/*Mobile menu*/}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -288,6 +288,16 @@ export default function Header() {
                 </motion.div>
                 <motion.div variants={mobileItemVariants}>
                   <Link
+                    href="/apply"
+                    className={`flex px-3 py-4 text-[var(--theme-text-primary)] hover:text-[var(--theme-text-accent)] hover:bg-[var(--theme-text-accent)]/10 transition-all duration-200 font-medium font-sans rounded-lg min-h-[48px] items-center touch-manipulation`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    data-umami-event="Mobile Nav - Apply"
+                  >
+                    Apply
+                  </Link>
+                </motion.div>
+                <motion.div variants={mobileItemVariants}>
+                  <Link
                     href="/past-events"
                     className={`flex px-3 py-4 text-[var(--theme-text-primary)] hover:text-[var(--theme-text-accent)] hover:bg-[var(--theme-text-accent)]/10 transition-all duration-200 font-medium font-sans rounded-lg min-h-[48px] items-center touch-manipulation`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -324,7 +334,7 @@ export default function Header() {
         </AnimatePresence>
       </div>
 
-      {/* Command Menu */}
+      {/*Command Menu*/}
       <CommandMenu open={isCommandMenuOpen} onOpenChange={setIsCommandMenuOpen} />
     </header>
   );

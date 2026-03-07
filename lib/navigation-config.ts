@@ -88,6 +88,18 @@ export const getNavigationItems = (): NavigationItem[] => {
       variant: "default",
     },
     {
+      label: "Apply",
+      href: "/apply",
+      description: "Apply to become a club officer",
+      category: "main",
+      showInHeader: true,
+      showInCommandMenu: true,
+      keywords: ["apply", "officer", "join", "position", "role"],
+      icon: "📝",
+      umamiEvent: "Nav - Apply",
+      variant: "default",
+    },
+    {
       label: "Past Events",
       href: "/past-events",
       description: "Browse our past workshops, hackathons, and meetups",
