@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
-// Email routing per position
+// Email routing per position — TEST MODE (all routed to yuvambh@gmail.com)
 const POSITION_EMAILS: Record<string, { to: string[]; cc?: string[] }> = {
   business: {
-    to: ["ericli@asu.edu"],
+    to: ["yuvambh@gmail.com"],
   },
   technology: {
-    to: ["tet@tet.moe", "shivenshekar01@gmail.com"],
+    to: ["yuvambh@gmail.com"],
   },
   industry: {
-    to: ["tmavunga@tbird.asu.edu"],
-    cc: ["akok2@asu.edu", "shivenshekar01@gmail.com", "favarzam@asu.edu"],
+    to: ["yuvambh@gmail.com"],
+    cc: ["yuvambh@gmail.com"],
   },
   operations: {
-    to: ["shivenshekar01@gmail.com", "sjulaka7@asu.edu"],
+    to: ["yuvambh@gmail.com"],
   },
   hackathon: {
-    to: ["shivenshekar01@gmail.com", "tet@tet.moe"],
+    to: ["yuvambh@gmail.com"],
   },
 };
 
