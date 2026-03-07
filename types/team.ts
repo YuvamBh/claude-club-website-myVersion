@@ -117,8 +117,11 @@ export const teamMembers: TeamMember[] = [
     name: "Vishnu Vardhana Reddy Devi",
     position: "Technology",
     image: "/staff/vishnu.png",
-    linkedinUrl: "https://www.linkedin.com/in/vishnuvardhana-reddy-devi-reddy-8530392a1",
+    linkedinUrl:
+      "https://www.linkedin.com/in/vishnuvardhana-reddy-devi-reddy-8530392a1",
     websiteUrl: "https://vishnuvardhana.vercel.app/",
+    description:
+      "Vishnu is a passionate builder and problem-solver with a strong interest in AI/ML technology. Focused on creating practical systems that combine software engineering and machine learning to solve real-world problems.",
   },
 ];
 
