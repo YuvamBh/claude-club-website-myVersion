@@ -3,6 +3,7 @@
 import { useState, useRef, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CheckCircle2, Upload, X, Briefcase, Cpu, Building2, Settings, Rocket } from "lucide-react";
+import { RippleButton } from "../components/ui/ripple-button";
 
 const Dithering = lazy(() =>
   import("@paper-design/shaders-react").then((mod) => ({ default: mod.Dithering }))
@@ -18,7 +19,7 @@ import {
   Container,
 } from "../components/ui";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+//Constants
 
 const TOTAL_STEPS = 3;
 
@@ -36,8 +37,7 @@ const STEPS = [
   { number: 3, label: "Position & Resume" },
 ];
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
+//Types
 interface FormData {
   fullName: string;
   email: string;
@@ -64,7 +64,7 @@ const initial: FormData = {
   positions: [], resume: null,
 };
 
-// ─── Step content variants ────────────────────────────────────────────────────
+//Step content variants
 
 const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
@@ -72,7 +72,7 @@ const slideVariants = {
   exit:  (dir: number) => ({ opacity: 0, x: dir > 0 ? -60 : 60 }),
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+//Main Component
 
 export default function ApplyPage() {
   const [isHovered, setIsHovered] = useState(false);
@@ -87,7 +87,7 @@ export default function ApplyPage() {
 
   const progress = ((step - 1) / TOTAL_STEPS) * 100;
 
-  // ── Field helpers ──────────────────────────────────────────────────────────
+  //Field helpers
   const field = (name: keyof FormData) => ({
     name,
     value: formData[name] as string,
@@ -97,7 +97,7 @@ export default function ApplyPage() {
     },
   });
 
-  // ── Validation per step ────────────────────────────────────────────────────
+  //Validation per step
   const validateStep = (s: number): boolean => {
     const e: Errors = {};
     const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -146,7 +146,7 @@ export default function ApplyPage() {
     setErrors(p => ({ ...p, positions: undefined }));
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  //Submit
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
     setIsSubmitting(true);
@@ -188,7 +188,7 @@ export default function ApplyPage() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  // ── Success screen ─────────────────────────────────────────────────────────
+  //Success screen
   if (submitStatus === "success") {
     return (
       <div className="min-h-dvh flex flex-col">
@@ -211,7 +211,7 @@ export default function ApplyPage() {
             </motion.div>
             <Heading level="h2" animate={false} className="mb-3">Application Submitted!</Heading>
             <Text variant="secondary" className="mb-8">
-              Thank you for applying. The relevant team leads will review your application and reach out soon.
+              Thank you for applying. We will review your application and reach out soon.
             </Text>
             <Button onClick={reset} variant="secondary">Submit Another Application</Button>
           </motion.div>
@@ -221,20 +221,20 @@ export default function ApplyPage() {
     );
   }
 
-  // ── Main form ──────────────────────────────────────────────────────────────
+  //Main form
   return (
     <div className="min-h-dvh flex flex-col">
       <Header />
       <main className="flex-1 py-12 sm:py-16">
         <Container size="xl" animate>
 
-          {/* Page title with Dithering background */}
+          {/*Page title with Dithering background*/}
           <div
             className="text-center mb-10 space-y-3 relative rounded-3xl overflow-hidden py-12 px-4"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            {/* Dithering shader background */}
+            {/*Dithering shader background*/}
             <Suspense fallback={null}>
               <div className="absolute inset-0 z-0 pointer-events-none opacity-30 dark:opacity-25 mix-blend-multiply dark:mix-blend-screen">
                 <Dithering
@@ -249,7 +249,7 @@ export default function ApplyPage() {
               </div>
             </Suspense>
 
-            {/* Content */}
+            {/*Content*/}
             <div className="relative z-10">
               <div
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border mb-4"
@@ -259,25 +259,25 @@ export default function ApplyPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "var(--theme-text-accent)" }} />
                   <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "var(--theme-text-accent)" }} />
                 </span>
-                Now Accepting Applications
+                Applications Open!
               </div>
               <Heading level="h1" animate={false}>Join the Team</Heading>
               <Text size="lg" variant="secondary" className="max-w-xl mx-auto mt-2">
-                We&apos;re looking for ambitious, driven students who want to shape the future of AI at ASU — apply in 3 quick steps.
+                We&apos;re looking for ambitious, driven students who want to shape the future of AI at ASU!
               </Text>
             </div>
           </div>
 
           <div className="max-w-2xl mx-auto">
 
-            {/* Card */}
+            {/*Card*/}
             <div
               className="rounded-2xl border overflow-hidden"
               style={{ background: "var(--theme-card-bg)", borderColor: "var(--theme-card-border)" }}
             >
-              {/* Progress header */}
+              {/*Progress header*/}
               <div className="px-6 pt-6 pb-5 border-b" style={{ borderColor: "var(--theme-card-border)" }}>
-                {/* Step pills */}
+                {/*Step pills*/}
                 <div className="flex items-center gap-2 mb-5">
                   {STEPS.map((s, i) => (
                     <div key={s.number} className="flex items-center gap-2 flex-1 last:flex-none">
@@ -306,7 +306,7 @@ export default function ApplyPage() {
                   ))}
                 </div>
 
-                {/* Progress bar */}
+                {/*Progress bar*/}
                 <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "var(--theme-card-border)" }}>
                   <motion.div
                     className="absolute inset-y-0 left-0 rounded-full"
@@ -317,13 +317,13 @@ export default function ApplyPage() {
                 </div>
                 <div className="flex justify-between mt-2">
                   <Text size="xs" variant="secondary" className="font-medium">
-                    Step {step} of {TOTAL_STEPS} — {STEPS[step - 1].label}
+                    Step {step} of {TOTAL_STEPS} : {STEPS[step - 1].label}
                   </Text>
                   <Text size="xs" variant="secondary">{Math.round(progress + 100 / TOTAL_STEPS)}% complete</Text>
                 </div>
               </div>
 
-              {/* Step content */}
+              {/*Step content*/}
               <div className="px-6 py-6 min-h-[340px]">
                 <AnimatePresence mode="wait" custom={dir}>
                   <motion.div
@@ -336,7 +336,7 @@ export default function ApplyPage() {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
 
-                    {/* ── Step 1: Personal Info ── */}
+                    {/*Step 1: Personal Info*/}
                     {step === 1 && (
                       <div className="space-y-5">
                         <div>
@@ -361,7 +361,7 @@ export default function ApplyPage() {
                       </div>
                     )}
 
-                    {/* ── Step 2: Links ── */}
+                    {/*Step 2: Links*/}
                     {step === 2 && (
                       <div className="space-y-5">
                         <div>
@@ -398,11 +398,11 @@ export default function ApplyPage() {
                       </div>
                     )}
 
-                    {/* ── Step 3: Position + Resume ── */}
+                    {/*Step 3: Position + Resume*/}
                     {step === 3 && (
                       <div className="space-y-6">
 
-                        {/* Positions */}
+                        {/*Positions*/}
                         <div>
                           <div className="flex items-center justify-between mb-3">
                             <Text size="sm" className="font-semibold" style={{ color: "var(--theme-text-accent)" }}>
@@ -454,7 +454,7 @@ export default function ApplyPage() {
                           )}
                         </div>
 
-                        {/* Resume upload */}
+                        {/*Resume upload*/}
                         <div>
                           <Label htmlFor="resume" required>Resume</Label>
                           <div
@@ -519,21 +519,16 @@ export default function ApplyPage() {
                 </AnimatePresence>
               </div>
 
-              {/* Footer / Navigation */}
+              {/*Footer / Navigation*/}
               <div
                 className="px-6 py-4 border-t flex items-center justify-between"
                 style={{ borderColor: "var(--theme-card-border)", background: "var(--theme-card-gradient-end)" }}
               >
                 <div>
                   {step > 1 ? (
-                    <motion.div
-                      whileTap={{ scale: 0.88, rotate: -1 }}
-                      transition={{ type: "spring", stiffness: 600, damping: 14 }}
-                    >
-                      <Button variant="ghost" onClick={goBack} size="sm">
-                        <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                      </Button>
-                    </motion.div>
+                    <RippleButton variant="ghost" onClick={goBack}>
+                      <ArrowLeft className="w-4 h-4" /> Back
+                    </RippleButton>
                   ) : (
                     <Text size="xs" variant="secondary">
                       Reviewed within 5 business days.
@@ -545,25 +540,20 @@ export default function ApplyPage() {
                   {submitStatus === "error" && (
                     <Text size="xs" className="text-red-400 max-w-[200px] text-right">{errorMsg}</Text>
                   )}
-                  <motion.div
-                    whileTap={{ scale: 0.88, rotate: 1 }}
-                    transition={{ type: "spring", stiffness: 700, damping: 14 }}
-                  >
-                    <Button onClick={goNext} disabled={isSubmitting}>
-                      {step < TOTAL_STEPS ? (
-                        <><span>{STEPS[step].label}</span><ArrowRight className="w-4 h-4 ml-1" /></>
-                      ) : isSubmitting ? (
-                        <motion.span
-                          animate={{ opacity: [1, 0.5, 1] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
-                          Submitting…
-                        </motion.span>
-                      ) : (
-                        "Submit Application"
-                      )}
-                    </Button>
-                  </motion.div>
+                  <RippleButton onClick={goNext} disabled={isSubmitting}>
+                    {step < TOTAL_STEPS ? (
+                      <>{STEPS[step].label}<ArrowRight className="w-4 h-4" /></>
+                    ) : isSubmitting ? (
+                      <motion.span
+                        animate={{ opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        Submitting…
+                      </motion.span>
+                    ) : (
+                      "Submit Application"
+                    )}
+                  </RippleButton>
                 </div>
               </div>
             </div>
