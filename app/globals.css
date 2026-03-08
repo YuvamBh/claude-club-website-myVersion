@@ -274,6 +274,48 @@ body {
   background: rgba(26, 26, 26, 0.65);
 }
 
+/* Success state variables */
+:root {
+  --success: 25 80% 58%;
+  --success-foreground: 30 100% 97%;
+}
+
+.dark {
+  --success: 25 75% 65%;
+  --success-foreground: 30 100% 97%;
+}
+
+/* Pop-in animation for checkmark */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Confetti burst animation */
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
+    opacity: 0;
+  }
+}
+
 /* Animated stripes for mystery card */
 @keyframes stripes {
   from {

@@ -39,10 +39,11 @@ const ensureEnv = () => {
 
 const createTransporter = () => {
   ensureEnv();
+  const port = parseInt(process.env.SMTP_PORT || "587", 10);
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "587", 10),
-    secure: process.env.SMTP_SECURE === "true",
+    port,
+    secure: port === 465,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -53,17 +54,21 @@ const createTransporter = () => {
 const sanitize = (value: FormDataEntryValue | null) =>
   typeof value === "string" ? value.trim() : "";
 
-function buildEmailHtml(params: {
+// ─── Admin notification email ─────────────────────────────────────────────────
+
+function buildAdminEmailHtml(params: {
   fullName: string;
   email: string;
   phone: string;
   website: string;
   github: string;
   linkedin: string;
-  position: string;
+  positions: string[];
   submittedAt: string;
 }) {
-  const { fullName, email, phone, website, github, linkedin, position, submittedAt } = params;
+  const { fullName, email, phone, website, github, linkedin, positions, submittedAt } = params;
+  const positionLabels = positions.map((p) => POSITION_LABELS[p] ?? p).join(", ");
+
   return `
 <!DOCTYPE html>
 <html>
@@ -71,9 +76,9 @@ function buildEmailHtml(params: {
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
   <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
     <h1 style="color: #ff9b7a; margin: 0; font-size: 22px;">New Officer Application</h1>
-    <p style="color: #aaa; margin: 8px 0 0; font-size: 14px;">ASU Claude Builder Club — ${POSITION_LABELS[position] ?? position} Team</p>
+    <p style="color: #aaa; margin: 8px 0 0; font-size: 14px;">ASU Claude Builder Club : ${positionLabels}</p>
   </div>
-  
+
   <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
     <h2 style="margin: 0 0 16px; font-size: 16px; color: #555;">Applicant Details</h2>
     <table style="width: 100%; border-collapse: collapse;">
@@ -83,37 +88,103 @@ function buildEmailHtml(params: {
       <tr><td style="padding: 8px 0; color: #888; font-size: 13px;">LinkedIn</td><td style="padding: 8px 0;"><a href="${linkedin.startsWith("http") ? linkedin : "https://" + linkedin}" style="color: #cc785c;">${linkedin}</a></td></tr>
       ${github ? `<tr><td style="padding: 8px 0; color: #888; font-size: 13px;">GitHub</td><td style="padding: 8px 0;"><a href="${github.startsWith("http") ? github : "https://" + github}" style="color: #cc785c;">${github}</a></td></tr>` : ""}
       ${website ? `<tr><td style="padding: 8px 0; color: #888; font-size: 13px;">Website</td><td style="padding: 8px 0;"><a href="${website}" style="color: #cc785c;">${website}</a></td></tr>` : ""}
-      <tr><td style="padding: 8px 0; color: #888; font-size: 13px;">Applied For</td><td style="padding: 8px 0; font-weight: 600; color: #cc785c;">${POSITION_LABELS[position] ?? position}</td></tr>
+      <tr><td style="padding: 8px 0; color: #888; font-size: 13px;">Applied For</td><td style="padding: 8px 0; font-weight: 600; color: #cc785c;">${positionLabels}</td></tr>
     </table>
   </div>
-  
+
   <p style="color: #999; font-size: 12px; text-align: center;">Submitted on ${new Date(submittedAt).toLocaleString("en-US", { timeZone: "America/Phoenix" })} (MST) · ASU Claude Builder Club</p>
 </body>
 </html>
   `.trim();
 }
 
-function buildEmailText(params: {
+function buildAdminEmailText(params: {
   fullName: string;
   email: string;
   phone: string;
   website: string;
   github: string;
   linkedin: string;
-  position: string;
+  positions: string[];
   submittedAt: string;
 }) {
-  return `New Officer Application — ${POSITION_LABELS[params.position] ?? params.position}
+  const positionLabels = params.positions.map((p) => POSITION_LABELS[p] ?? p).join(", ");
+  return `New Officer Application : ${positionLabels}
 
 Applicant: ${params.fullName}
 Email: ${params.email}
 Phone: ${params.phone}
 LinkedIn: ${params.linkedin}${params.github ? `\nGitHub: ${params.github}` : ""}${params.website ? `\nWebsite: ${params.website}` : ""}
-Applied For: ${POSITION_LABELS[params.position] ?? params.position}
+Applied For: ${positionLabels}
 
 Submitted: ${new Date(params.submittedAt).toLocaleString("en-US", { timeZone: "America/Phoenix" })} MST
 `;
 }
+
+// ─── Applicant confirmation email ─────────────────────────────────────────────
+
+function buildApplicantEmailHtml(params: {
+  fullName: string;
+  positions: string[];
+  submittedAt: string;
+}) {
+  const { fullName, positions, submittedAt } = params;
+  const positionLabels = positions.map((p) => POSITION_LABELS[p] ?? p).join(" & ");
+  const firstName = fullName.split(" ")[0];
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/></head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <h1 style="color: #ff9b7a; margin: 0; font-size: 22px;">Application Received!</h1>
+    <p style="color: #aaa; margin: 8px 0 0; font-size: 14px;">ASU Claude Builder Club</p>
+  </div>
+
+  <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+    <p style="margin: 0 0 12px; font-size: 15px;">Hey ${firstName},</p>
+    <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: #555;">
+      Thanks for applying to the <strong>ASU Claude Builder Club</strong>! We've received your application for the <strong style="color: #cc785c;">${positionLabels}</strong> position${positions.length > 1 ? "s" : ""}.
+    </p>
+    <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: #555;">
+      Our team will review your application and reach out to you within <strong>5 business days</strong>.
+    </p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #555;">
+      In the meantime, feel free to check out our website or reach out if you have any questions.
+    </p>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="https://claudebuilder.club" style="display: inline-block; background: #cc785c; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">Visit our website</a>
+  </div>
+
+  <p style="color: #999; font-size: 12px; text-align: center;">Submitted on ${new Date(submittedAt).toLocaleString("en-US", { timeZone: "America/Phoenix" })} (MST) · ASU Claude Builder Club</p>
+</body>
+</html>
+  `.trim();
+}
+
+function buildApplicantEmailText(params: {
+  fullName: string;
+  positions: string[];
+  submittedAt: string;
+}) {
+  const positionLabels = params.positions.map((p) => POSITION_LABELS[p] ?? p).join(" & ");
+  const firstName = params.fullName.split(" ")[0];
+  return `Hey ${firstName},
+
+Thanks for applying to the ASU Claude Builder Club! We've received your application for the ${positionLabels} position${params.positions.length > 1 ? "s" : ""}.
+
+Our team will review your application and reach out to you within 5 business days.
+
+Visit us at https://claudebuilder.club
+
+Submitted: ${new Date(params.submittedAt).toLocaleString("en-US", { timeZone: "America/Phoenix" })} MST
+`;
+}
+
+// ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,7 +199,6 @@ export async function POST(request: NextRequest) {
     const positionsRaw = sanitize(formData.get("positions"));
     const resumeEntry = formData.get("resume");
 
-    // Validate required fields
     if (!fullName || !email || !phone || !linkedin || !positionsRaw) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -148,14 +218,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid positions data" }, { status: 400 });
     }
 
-    // Validate all positions are known
     for (const pos of positions) {
       if (!POSITION_EMAILS[pos]) {
         return NextResponse.json({ error: `Unknown position: ${pos}` }, { status: 400 });
       }
     }
 
-    // Resume attachment
     let attachment: { filename: string; content: Buffer } | null = null;
     if (resumeEntry && resumeEntry instanceof Blob) {
       const resumeFile = resumeEntry as File;
@@ -170,26 +238,45 @@ export async function POST(request: NextRequest) {
 
     const transporter = createTransporter();
     const submittedAt = new Date().toISOString();
+    const positionLabels = positions.map((p) => POSITION_LABELS[p] ?? p).join(" & ");
 
-    // Send one email per selected position
-    const emailPromises = positions.map((position) => {
-      const routing = POSITION_EMAILS[position];
-      const emailParams = { fullName, email, phone, website, github, linkedin, position, submittedAt };
-      return transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: routing.to.join(", "),
-        cc: routing.cc ? routing.cc.join(", ") : undefined,
-        replyTo: email,
-        subject: `Officer Application — ${POSITION_LABELS[position]}: ${fullName}`,
-        text: buildEmailText(emailParams),
-        html: buildEmailHtml(emailParams),
-        attachments: attachment
-          ? [{ filename: attachment.filename, content: attachment.content }]
-          : [],
-      });
+    // Merge recipients from all selected positions (deduplicated)
+    const toSet = new Set<string>();
+    const ccSet = new Set<string>();
+    for (const pos of positions) {
+      POSITION_EMAILS[pos].to.forEach((addr) => toSet.add(addr));
+      POSITION_EMAILS[pos].cc?.forEach((addr) => ccSet.add(addr));
+    }
+    // cc should not overlap with to
+    toSet.forEach((addr) => ccSet.delete(addr));
+
+    const sharedParams = { fullName, email, phone, website, github, linkedin, positions, submittedAt };
+    const attachments = attachment
+      ? [{ filename: attachment.filename, content: attachment.content }]
+      : [];
+
+    // Single admin email covering all positions
+    const adminMail = transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: Array.from(toSet).join(", "),
+      cc: ccSet.size > 0 ? Array.from(ccSet).join(", ") : undefined,
+      replyTo: email,
+      subject: `Officer Application : ${positionLabels}: ${fullName}`,
+      text: buildAdminEmailText(sharedParams),
+      html: buildAdminEmailHtml(sharedParams),
+      attachments,
     });
 
-    await Promise.all(emailPromises);
+    // Confirmation email to the applicant
+    const applicantMail = transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: `We received your application, ${fullName.split(" ")[0]}!`,
+      text: buildApplicantEmailText({ fullName, positions, submittedAt }),
+      html: buildApplicantEmailHtml({ fullName, positions, submittedAt }),
+    });
+
+    await Promise.all([adminMail, applicantMail]);
 
     return NextResponse.json({ message: "Application submitted" }, { status: 200 });
   } catch (error) {

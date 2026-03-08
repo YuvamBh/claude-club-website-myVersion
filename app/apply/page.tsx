@@ -2,7 +2,8 @@
 
 import { useState, useRef, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, CheckCircle2, Upload, X, Briefcase, Cpu, Building2, Settings, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Upload, X, Briefcase, Cpu, Building2, Settings, Rocket, Sparkles, Mail, Clock } from "lucide-react";
+import { HoldButton } from "../components/ui/hold-button";
 import { RippleButton } from "../components/ui/ripple-button";
 
 const Dithering = lazy(() =>
@@ -15,7 +16,6 @@ import {
   Text,
   Label,
   Input,
-  Button,
   Container,
 } from "../components/ui";
 
@@ -231,31 +231,155 @@ export default function ApplyPage() {
 
   //Success screen
   if (submitStatus === "success") {
+    // Confetti particle configs
+    const particles = Array.from({ length: 14 }, (_, i) => ({
+      id: i,
+      tx: `${(Math.random() - 0.5) * 200}px`,
+      ty: `${-(Math.random() * 160 + 60)}px`,
+      rot: `${(Math.random() - 0.5) * 720}deg`,
+      color: i % 3 === 0 ? "var(--theme-text-accent)" : i % 3 === 1 ? "#f59e0b" : "#10b981",
+      size: Math.random() * 8 + 6,
+      delay: Math.random() * 0.3,
+    }));
+
     return (
       <div className="min-h-dvh flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center py-16 px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="text-center max-w-md"
-          >
+          <div className="relative text-center max-w-md w-full">
+
+            {/* Confetti burst */}
+            <div className="absolute left-1/2 top-16 -translate-x-1/2 pointer-events-none">
+              {particles.map((p) => (
+                <motion.span
+                  key={p.id}
+                  className="absolute rounded-sm"
+                  style={{
+                    width: p.size,
+                    height: p.size,
+                    background: p.color,
+                    left: "50%",
+                    top: "50%",
+                  }}
+                  initial={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
+                  animate={{
+                    x: p.tx,
+                    y: p.ty,
+                    rotate: p.rot,
+                    scale: 0,
+                    opacity: 0,
+                  }}
+                  transition={{
+                    duration: 1.0,
+                    delay: 0.3 + p.delay,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Icon ring */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ background: "var(--theme-gradient-accent)", border: "2px solid var(--theme-text-accent)" }}
+              initial={{ scale: 0, rotate: -15 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 280, damping: 18 }}
+              className="relative w-24 h-24 mx-auto mb-7"
             >
-              <CheckCircle2 className="w-10 h-10" style={{ color: "var(--theme-text-accent)" }} />
+              {/* Pulsing outer ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{ background: "var(--theme-gradient-accent)", border: "2px solid var(--theme-text-accent)" }}
+                initial={{ scale: 1, opacity: 0.6 }}
+                animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              {/* Main circle */}
+              <div
+                className="relative w-full h-full rounded-full flex items-center justify-center"
+                style={{ background: "var(--theme-gradient-accent)", border: "2px solid var(--theme-text-accent)" }}
+              >
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.35, type: "spring", stiffness: 350, damping: 16 }}
+                >
+                  <CheckCircle2 className="w-11 h-11" style={{ color: "var(--theme-text-accent)" }} />
+                </motion.div>
+              </div>
+              {/* Sparkle accents */}
+              {[
+                { top: "-8px", right: "-4px", delay: 0.55 },
+                { bottom: "-4px", left: "-8px", delay: 0.65 },
+                { top: "4px", left: "-12px", delay: 0.75 },
+              ].map((s, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute"
+                  style={s}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.7] }}
+                  transition={{ delay: s.delay, duration: 0.5, ease: "backOut" }}
+                >
+                  <Sparkles className="w-4 h-4" style={{ color: "var(--theme-text-accent)" }} />
+                </motion.div>
+              ))}
             </motion.div>
-            <Heading level="h2" animate={false} className="mb-3">Application Submitted!</Heading>
-            <Text variant="secondary" className="mb-8">
-              Thank you for applying. We will review your application and reach out soon.
-            </Text>
-            <Button onClick={reset} variant="secondary">Submit Another Application</Button>
-          </motion.div>
+
+            {/* Text content */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }}
+            >
+              <Heading level="h2" animate={false} className="mb-3">
+                Application Submitted!
+              </Heading>
+              <Text variant="secondary" className="mb-2">
+                Thank you for applying to join the Claude Club team.
+              </Text>
+              <Text variant="secondary" className="mb-8">
+                We&apos;ll review your application and reach out within 5 business days.
+              </Text>
+            </motion.div>
+
+            {/* Info pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.45, ease: "easeOut" }}
+              className="flex items-center justify-center gap-3 mb-10 flex-wrap"
+            >
+              {[
+                { icon: Mail, label: "Check your email for confirmation" },
+                { icon: Clock, label: "~5 business days" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border"
+                  style={{
+                    borderColor: "var(--theme-card-border)",
+                    background: "var(--theme-card-bg)",
+                    color: "var(--theme-text-primary)",
+                    opacity: 0.75,
+                  }}
+                >
+                  <Icon className="w-3 h-3" style={{ color: "var(--theme-text-accent)" }} />
+                  {label}
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Hold-to-confirm reset button */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.4, ease: "easeOut" }}
+              className="flex justify-center pb-6"
+            >
+              <HoldButton onConfirm={reset} holdDuration={1800} />
+            </motion.div>
+
+          </div>
         </main>
         <Footer />
       </div>
