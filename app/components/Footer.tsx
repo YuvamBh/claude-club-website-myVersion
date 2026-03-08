@@ -37,7 +37,11 @@ const quickLinks = [
   { label: "Industry", href: "/industry" },
   { label: "Past Events", href: "/past-events" },
   { label: "Contact", href: "/contact" },
+  { label: "Apply", href: "/apply" },
 ];
+
+const quickLinksLeft = quickLinks.slice(0, 4);
+const quickLinksRight = quickLinks.slice(4);
 
 const socialLinks = [
   {
@@ -119,7 +123,7 @@ export default function Footer() {
       </div>
 
       <div className="hidden sm:block max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 sm:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-0 sm:gap-12">
           {/*Column 1 — Brand*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pb-6 sm:pb-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-sm font-bold tracking-wide text-[var(--theme-text-primary)] uppercase">
@@ -148,13 +152,13 @@ export default function Footer() {
             </div>
           </motion.div>
 
-          {/*Column 2 — Quick Links*/}
+          {/*Column 2 — Quick Links (left: first 4)*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left py-6 sm:py-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Quick Links
             </p>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
+              {quickLinksLeft.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -168,7 +172,27 @@ export default function Footer() {
             </ul>
           </motion.div>
 
-          {/*Column 3 — Sponsor CTA*/}
+          {/*Column 3 — Quick Links (right: last 3)*/}
+          <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left py-6 sm:py-0 border-b border-[var(--theme-card-border)] sm:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50 invisible">
+              &nbsp;
+            </p>
+            <ul className="space-y-2">
+              {quickLinksRight.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-[var(--theme-text-primary)]/70 hover:text-[var(--theme-text-accent)] transition-colors duration-200 inline-flex items-center gap-1 group"
+                  >
+                    <span className="w-0 group-hover:w-2 h-px bg-[var(--theme-text-accent)] transition-all duration-200 rounded hidden sm:inline-block" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/*Column 4 — Sponsor CTA*/}
           <motion.div variants={itemVariants} className="space-y-3 text-center sm:text-left pt-6 sm:pt-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--theme-text-primary)]/50">
               Partner With Us
