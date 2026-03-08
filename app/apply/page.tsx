@@ -54,6 +54,8 @@ interface Errors {
   email?: string;
   phone?: string;
   linkedin?: string;
+  github?: string;
+  website?: string;
   positions?: string;
   resume?: string;
 }
@@ -97,20 +99,59 @@ export default function ApplyPage() {
     },
   });
 
+  // Phone auto-formatter — produces (XXX) XXX-XXXX
+  const phoneField = {
+    name: "phone" as const,
+    value: formData.phone,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+      let formatted = digits;
+      if (digits.length > 6)       formatted = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+      else if (digits.length > 3)  formatted = `(${digits.slice(0,3)}) ${digits.slice(3)}`;
+      else if (digits.length > 0)  formatted = `(${digits}`;
+      setFormData(p => ({ ...p, phone: formatted }));
+      setErrors(p => ({ ...p, phone: undefined }));
+    },
+  };
+
   //Validation per step
   const validateStep = (s: number): boolean => {
     const e: Errors = {};
-    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Strict regex constants
+    const emailRx   = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    const urlRx     = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+    const phoneDigits = formData.phone.replace(/\D/g, "");
 
     if (s === 1) {
-      if (!formData.fullName.trim()) e.fullName = "Required";
-      if (!formData.email.trim()) e.email = "Required";
-      else if (!emailRx.test(formData.email.trim())) e.email = "Invalid email";
-      if (!formData.phone.trim()) e.phone = "Required";
+      // Full name: must contain at least two words (first + last)
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      if (nameParts.length < 2 || nameParts.some(p => p.length < 1))
+        e.fullName = "Please enter your first and last name";
+
+      // Email
+      if (!formData.email.trim())                     e.email = "Required";
+      else if (!emailRx.test(formData.email.trim()))  e.email = "Enter a valid email address";
+
+      // Phone: exactly 10 digits
+      if (!formData.phone.trim())     e.phone = "Required";
+      else if (phoneDigits.length !== 10) e.phone = "Enter a valid 10-digit phone number";
     }
+
     if (s === 2) {
-      if (!formData.linkedin.trim()) e.linkedin = "LinkedIn is required";
+      // LinkedIn — required, must be a valid URL
+      if (!formData.linkedin.trim())                     e.linkedin = "LinkedIn URL is required";
+      else if (!urlRx.test(formData.linkedin.trim()))    e.linkedin = "Enter a valid URL (include https://)";
+
+      // GitHub — optional, but if provided must be valid URL  
+      if (formData.github.trim() && !urlRx.test(formData.github.trim()))
+        e.github = "Enter a valid URL (include https://)";
+
+      // Website — optional, but if provided must be valid URL
+      if (formData.website.trim() && !urlRx.test(formData.website.trim()))
+        e.website = "Enter a valid URL (include https://)";
     }
+
     if (s === 3) {
       if (formData.positions.length === 0) e.positions = "Select at least one position";
       if (!formData.resume) e.resume = "Resume is required";
@@ -355,7 +396,7 @@ export default function ApplyPage() {
                           </div>
                           <div className="sm:col-span-2">
                             <Label htmlFor="phone" required>Phone Number</Label>
-                            <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" error={errors.phone} fullWidth {...field("phone")} />
+                            <Input id="phone" type="tel" placeholder="(555) 555-5555" error={errors.phone} fullWidth {...phoneField} />
                           </div>
                         </div>
                       </div>
@@ -375,7 +416,7 @@ export default function ApplyPage() {
                             <div className="relative">
                               <Input
                                 id="linkedin"
-                                placeholder="linkedin.com/in/janedoe"
+                                placeholder="https://linkedin.com/in/janedoe"
                                 error={errors.linkedin}
                                 fullWidth
                                 {...field("linkedin")}
@@ -386,13 +427,13 @@ export default function ApplyPage() {
                             <Label htmlFor="github">
                               GitHub <span className="text-xs opacity-40 font-normal">(optional)</span>
                             </Label>
-                            <Input id="github" placeholder="github.com/janedoe" fullWidth {...field("github")} />
+                            <Input id="github" placeholder="https://github.com/janedoe" error={errors.github} fullWidth {...field("github")} />
                           </div>
                           <div>
                             <Label htmlFor="website">
                               Personal Website <span className="text-xs opacity-40 font-normal">(optional)</span>
                             </Label>
-                            <Input id="website" type="url" placeholder="https://janedoe.dev" fullWidth {...field("website")} />
+                            <Input id="website" type="url" placeholder="https://janedoe.dev" error={errors.website} fullWidth {...field("website")} />
                           </div>
                         </div>
                       </div>

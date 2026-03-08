@@ -72,7 +72,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-1 text-sm text-red-500"
+            className="mt-1 text-sm" style={{ color: "var(--theme-text-accent)" }}
           >
             {error}
           </motion.p>
