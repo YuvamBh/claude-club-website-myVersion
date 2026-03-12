@@ -65,7 +65,6 @@ export default async function DashboardPage() {
       {/* Announcements */}
       {hackathon.announcements.length > 0 && (
         <div className="mb-6 space-y-2">
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           {hackathon.announcements.slice(0, 2).map((a: any) => (
             <div
               key={a.id}
@@ -196,7 +195,6 @@ export default async function DashboardPage() {
                 )}
               </div>
               <div className="space-y-2">
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {team.members.map((m: any) => (
                   <div key={m.id} className="flex items-center gap-2.5 text-sm">
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -240,7 +238,6 @@ export default async function DashboardPage() {
         {hackathon.tracks.length > 0 && (
           <Section title="Tracks">
             <div className="space-y-2">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               {hackathon.tracks.map((t: any) => (
                 <div
                   key={t.id}
@@ -317,7 +314,6 @@ function StatusCard({
   cta,
   locked,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   title: string;
   status: "not_started" | "draft" | "done" | "locked";
