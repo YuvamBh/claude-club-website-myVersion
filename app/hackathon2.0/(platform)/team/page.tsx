@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { createTeam, joinTeam, leaveTeam, transferCaptain } from "@/lib/hackathon2.0/actions";
-import { Users, Plus, Link2, Copy, Check, LogOut, Crown, UserMinus } from "lucide-react";
+import { createTeam, joinTeam, leaveTeam, transferCaptain, deleteTeam } from "@/lib/hackathon2.0/actions";
+import { Users, Plus, Link2, Copy, Check, LogOut, Crown, UserMinus, Trash2, AlertTriangle } from "lucide-react";
 
 const HACKATHON_ID = process.env.NEXT_PUBLIC_HACKATHON_ID ?? "hackathon_placeholder";
 
@@ -95,6 +95,20 @@ export default function TeamPage() {
     if (!team) return;
     startTransition(async () => {
       const result = await transferCaptain(team.id, newUserId);
+      if (result.success) {
+        window.location.reload();
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  function handleDeleteTeam() {
+    if (!team) return;
+    if (!confirm("Are you ABSOLUTELY sure you want to delete this team? This action cannot be undone.")) return;
+    
+    startTransition(async () => {
+      const result = await deleteTeam(team.id);
       if (result.success) {
         window.location.reload();
       } else {
@@ -301,11 +315,13 @@ export default function TeamPage() {
             </div>
           </div>
 
-          {/* Leave team */}
-          {!isCaptain && (
-            <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-4">
-              <p className="text-sm text-white/50 mb-3">
-                Leaving the team is permanent. You can join a different team afterward.
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 rounded-xl border border-red-500/10 bg-red-500/5 p-4">
+              <p className="text-xs text-white/50 mb-3">
+                {isCaptain 
+                  ? "As captain, if you leave, captaincy will be transferred to the next oldest member. If you are the only member, the team will be deleted."
+                  : "Leaving the team is permanent. You can join a different team afterward."}
               </p>
               <button
                 onClick={handleLeave}
@@ -316,16 +332,23 @@ export default function TeamPage() {
                 {isPending ? "Leaving…" : "Leave Team"}
               </button>
             </div>
-          )}
 
-          {isCaptain && (
-            <div className="rounded-xl border border-white/5 bg-[#1a1a1a] p-4">
-              <p className="text-xs text-white/30">
-                As captain, you manage the final project submission. Transfer captain role before
-                leaving the team.
-              </p>
-            </div>
-          )}
+            {isCaptain && (
+              <div className="flex-1 rounded-xl border border-red-500/10 bg-red-500/5 p-4">
+                <p className="text-xs text-white/50 mb-3">
+                  Dissolve the team entirely. This will remove all members and delete the team record.
+                </p>
+                <button
+                  onClick={handleDeleteTeam}
+                  disabled={isPending}
+                  className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400 border border-red-500/20 hover:border-red-500/40 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <Trash2 size={14} />
+                  {isPending ? "Deleting…" : "Delete Team"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

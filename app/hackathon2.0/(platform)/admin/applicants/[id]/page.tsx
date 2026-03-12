@@ -184,15 +184,10 @@ export default async function ApplicantDetailPage({
           )}
 
           {/* Operational */}
-          {(application.dietaryNeeds || application.accessibilityNeeds) && (
+          {application.dietaryNeeds && (
             <Section title="Operational Details">
               <Grid>
-                {application.dietaryNeeds && (
-                  <InfoItem label="Dietary" value={application.dietaryNeeds} />
-                )}
-                {application.accessibilityNeeds && (
-                  <InfoItem label="Accessibility" value={application.accessibilityNeeds} />
-                )}
+                <InfoItem label="Dietary" value={application.dietaryNeeds} />
               </Grid>
             </Section>
           )}

@@ -25,9 +25,9 @@ export default async function PlatformLayout({
   const isAdmin = user.role === "ADMIN";
 
   return (
-    <div className="flex min-h-screen bg-[#111111] text-[#e0e0e0]">
+    <div className="flex min-h-screen bg-transparent text-[#e0e0e0] relative">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 border-r border-white/10 flex flex-col bg-[#161616]">
+      <aside className="w-64 shrink-0 border-r border-white/10 flex flex-col bg-[#161616]/80 backdrop-blur-xl">
         {/* Brand */}
         <div className="px-5 py-5 border-b border-white/10">
           <Link href="/hackathon2.0" className="flex items-center gap-2.5 group">
@@ -85,7 +85,7 @@ export default async function PlatformLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto relative z-10">
         <div className="max-w-5xl mx-auto px-6 py-8">{children}</div>
       </main>
     </div>

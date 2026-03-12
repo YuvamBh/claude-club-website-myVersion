@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { saveApplication, getMyApplication } from "@/lib/hackathon2.0/actions";
-import { CheckCircle2, Save, Send, ChevronRight, ChevronLeft, Upload, Loader2 } from "lucide-react";
+import { saveApplication, getMyApplication, uploadResume } from "@/lib/hackathon2.0/actions";
+import { CheckCircle2, Save, Send, ChevronRight, ChevronLeft, Upload, Loader2, X, FileText } from "lucide-react";
 
 const YEARS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 const EXPERIENCE_LEVELS = [
@@ -27,7 +27,6 @@ interface FormState {
   githubUrl: string;
   resumeUrl: string;
   dietaryNeeds: string;
-  accessibilityNeeds: string;
   agreedToRules: boolean;
 }
 
@@ -43,7 +42,6 @@ const defaultState: FormState = {
   githubUrl: "",
   resumeUrl: "",
   dietaryNeeds: "",
-  accessibilityNeeds: "",
   agreedToRules: false,
 };
 
@@ -61,6 +59,7 @@ export default function ApplyPage() {
   const [form, setForm] = useState<FormState>(defaultState);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [isPending, startTransition] = useTransition();
+  const [isUploading, setIsUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isLoadingDraft, setIsLoadingDraft] = useState(true);
@@ -108,12 +107,32 @@ export default function ApplyPage() {
       if (form.desiredTracks.length === 0) errs.desiredTracks = "Select at least one track";
       if (form.whyJoin.trim().length < 20) errs.whyJoin = "Please write at least 20 characters";
     }
+    if (s === 3) {
+      if (!form.githubUrl.trim()) errs.githubUrl = "GitHub URL is required";
+      if (!form.resumeUrl) errs.resumeUrl = "Resume is required";
+    }
+    if (s === 4) {
+      if (!form.agreedToRules) errs.agreedToRules = "You must agree to the rules";
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   function handleNext() {
     if (validateStep(step)) setStep((s) => s + 1);
+  }
+
+  function handleJumpToStep(target: number) {
+    // Only allow jumping back, or jumping forward if current is valid
+    if (target < step) {
+      setStep(target);
+    } else {
+      // If jumping forward, validate each step in between
+      for (let i = step; i < target; i++) {
+        if (!validateStep(i)) return;
+      }
+      setStep(target);
+    }
   }
 
   function handleSaveDraft() {
@@ -128,9 +147,35 @@ export default function ApplyPage() {
     });
   }
 
+  async function handleResumeUpload(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, resumeUrl: "File too large (max 10MB)" }));
+      return;
+    }
+    setIsUploading(true);
+    setErrors((prev) => ({ ...prev, resumeUrl: undefined }));
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const result = await uploadResume(formData);
+    setIsUploading(false);
+    
+    if (result.success) {
+      set("resumeUrl", result.data);
+    } else {
+      setErrors((prev) => ({ ...prev, resumeUrl: result.error }));
+    }
+  }
+
   function handleSubmit() {
     if (!form.agreedToRules) {
       setErrors({ agreedToRules: "You must agree to the rules" });
+      return;
+    }
+    if (!form.resumeUrl) {
+      setErrors({ resumeUrl: "Resume is required" });
+      setStep(3);
       return;
     }
     startTransition(async () => {
@@ -138,6 +183,8 @@ export default function ApplyPage() {
       if (result.success) {
         setSubmitted(true);
         setTimeout(() => router.push("/hackathon2.0/dashboard"), 1500);
+      } else {
+        setErrors((prev) => ({ ...prev, global: result.error }));
       }
     });
   }
@@ -176,7 +223,7 @@ export default function ApplyPage() {
         {STEPS.map((s, i) => (
           <div key={s.number} className="flex items-center gap-2">
             <button
-              onClick={() => step > s.number && setStep(s.number)}
+              onClick={() => handleJumpToStep(s.number)}
               className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
                 step === s.number
                   ? "text-[#ff9b7a]"
@@ -316,15 +363,15 @@ export default function ApplyPage() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-base font-semibold text-white mb-4">Links & Resume</h2>
-            <Field label="GitHub URL">
+            <Field label="GitHub URL" error={errors.githubUrl} required>
               <input
-                className={inputCls(false)}
+                className={inputCls(!!errors.githubUrl)}
                 placeholder="https://github.com/username"
                 value={form.githubUrl}
                 onChange={(e) => set("githubUrl", e.target.value)}
               />
             </Field>
-            <Field label="LinkedIn URL">
+            <Field label="LinkedIn URL (optional)">
               <input
                 className={inputCls(false)}
                 placeholder="https://linkedin.com/in/username"
@@ -332,33 +379,79 @@ export default function ApplyPage() {
                 onChange={(e) => set("linkedinUrl", e.target.value)}
               />
             </Field>
-            <Field label="Resume URL (Google Drive, Dropbox, etc.)">
-              <input
-                className={inputCls(false)}
-                placeholder="https://drive.google.com/..."
-                value={form.resumeUrl}
-                onChange={(e) => set("resumeUrl", e.target.value)}
-              />
-              <p className="text-xs text-white/30 mt-1">
-                Upload your resume to Google Drive or Dropbox and paste the shareable link.
-                File uploads coming soon.
-              </p>
+            
+            <Field label="Resume (PDF or DOCX)" error={errors.resumeUrl} required>
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) handleResumeUpload(file);
+                }}
+                className={`relative group flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed transition-all duration-200 ${
+                  form.resumeUrl 
+                    ? "border-green-500/30 bg-green-500/5" 
+                    : errors.resumeUrl 
+                    ? "border-red-500/30 bg-red-500/5"
+                    : "border-white/10 hover:border-[#ff9b7a]/30 hover:bg-[#ff9b7a]/5"
+                }`}
+              >
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleResumeUpload(file);
+                  }}
+                  disabled={isUploading}
+                />
+                
+                {isUploading ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#ff9b7a]" />
+                    <p className="text-sm text-white/50">Uploading...</p>
+                  </div>
+                ) : form.resumeUrl ? (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                      <FileText size={24} className="text-green-400" />
+                    </div>
+                    <p className="text-sm font-medium text-white">Resume Uploaded</p>
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        set("resumeUrl", "");
+                      }}
+                      className="mt-2 text-xs text-red-400 hover:text-red-300 flex items-center gap-1 bg-[#1a1a1a] px-2 py-1 rounded border border-white/5"
+                    >
+                      <X size={12} /> Remove and replace
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 group-hover:bg-[#ff9b7a]/20 transition-colors">
+                      <Upload size={24} className="text-white/40 group-hover:text-[#ff9b7a] transition-colors" />
+                    </div>
+                    <p className="text-sm font-medium text-white">Click or drag to upload resume</p>
+                    <p className="text-xs text-white/30 mt-1">PDF or DOCX (max 10MB)</p>
+                  </div>
+                )}
+              </div>
             </Field>
-            <div className="grid grid-cols-2 gap-4">
+
+            <div>
               <Field label="Dietary needs (optional)">
                 <input
                   className={inputCls(false)}
                   placeholder="Vegetarian, Vegan, etc."
                   value={form.dietaryNeeds}
                   onChange={(e) => set("dietaryNeeds", e.target.value)}
-                />
-              </Field>
-              <Field label="Accessibility needs (optional)">
-                <input
-                  className={inputCls(false)}
-                  placeholder="Wheelchair access, etc."
-                  value={form.accessibilityNeeds}
-                  onChange={(e) => set("accessibilityNeeds", e.target.value)}
                 />
               </Field>
             </div>

@@ -17,8 +17,8 @@ function SignInContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-transparent flex items-center justify-center px-4 relative">
+      <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
           <Trophy size={24} className="text-[#ff9b7a]" />

@@ -20,6 +20,22 @@ type ActionResult<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function generateInviteCode(): string {
+  const words = [
+    "sudo", "git", "hack", "asu", "code", "push", "pull", "commit", "build", 
+    "dev", "prod", "main", "debug", "pizza", "coffee", "react", "node", 
+    "logic", "byte", "pixel", "cloud", "stack", "error", "fixed", "claude"
+  ];
+  const count = Math.floor(Math.random() * 3) + 2; // 2-4 words
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(words[Math.floor(Math.random() * words.length)]);
+  }
+  return result.join("-") + "-" + Math.floor(Math.random() * 90 + 10);
+}
+
 // ─── Application ─────────────────────────────────────────────────────────────
 
 const ApplicationSchema = z.object({
@@ -33,9 +49,8 @@ const ApplicationSchema = z.object({
   whyJoin: z.string(),
   linkedinUrl: z.string().url().optional().or(z.literal("")),
   githubUrl: z.string().url().optional().or(z.literal("")),
-  resumeUrl: z.string().url().optional().or(z.literal("")),
+  resumeUrl: z.string().url().optional().or(z.literal("")), // Validated as required conditionally in saveAction
   dietaryNeeds: z.string().optional(),
-  accessibilityNeeds: z.string().optional(),
   agreedToRules: z.boolean(),
   submit: z.boolean().default(false),
 });
@@ -50,6 +65,17 @@ export async function saveApplication(
   }
 
   const { submit, hackathonId, ...rest } = parsed.data;
+
+  // Final validation for submission
+  if (submit) {
+    if (!rest.githubUrl || rest.githubUrl.trim() === "") {
+      return { success: false, error: "GitHub URL is required for submission." };
+    }
+    if (!rest.resumeUrl || rest.resumeUrl.trim() === "") {
+      return { success: false, error: "Resume is required for submission." };
+    }
+  }
+
   const db = createAdminClient();
   const now = new Date().toISOString();
 
@@ -67,7 +93,6 @@ export async function saveApplication(
     github_url: rest.githubUrl || null,
     resume_url: rest.resumeUrl || null,
     dietary_needs: rest.dietaryNeeds ?? null,
-    accessibility_needs: rest.accessibilityNeeds ?? null,
     agreed_to_rules: rest.agreedToRules,
     agreed_at: rest.agreedToRules ? now : null,
     status: submit ? "SUBMITTED" : "DRAFT",
@@ -86,6 +111,30 @@ export async function saveApplication(
   revalidatePath("/hackathon2.0/dashboard");
   revalidatePath("/hackathon2.0/apply");
   return { success: true, data };
+}
+
+export async function uploadResume(formData: FormData): Promise<ActionResult<string>> {
+  const user = await requireAuth();
+  const file = formData.get("file") as File;
+  if (!file) return { success: false, error: "No file provided" };
+  if (file.size > 10 * 1024 * 1024) return { success: false, error: "File too large (max 10MB)" };
+
+  const db = createAdminClient();
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+  const filePath = `resumes/${fileName}`;
+
+  const { error: uploadError } = await db.storage
+    .from("hackathon-assets")
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) {
+    // If bucket doesn't exist, this might fail. We assume "hackathon-assets" exists.
+    return { success: false, error: uploadError.message };
+  }
+
+  const { data } = db.storage.from("hackathon-assets").getPublicUrl(filePath);
+  return { success: true, data: data.publicUrl };
 }
 
 export async function getMyApplication(hackathonId: string): Promise<ActionResult> {
@@ -114,7 +163,6 @@ export async function getMyApplication(hackathonId: string): Promise<ActionResul
       githubUrl: data.github_url ?? "",
       resumeUrl: data.resume_url ?? "",
       dietaryNeeds: data.dietary_needs ?? "",
-      accessibilityNeeds: data.accessibility_needs ?? "",
       agreedToRules: data.agreed_to_rules ?? false,
     };
     return { success: true, data: camelData };
@@ -160,6 +208,7 @@ export async function createTeam(
       hackathon_id: parsed.data.hackathonId,
       name: parsed.data.name,
       track_id: parsed.data.trackId ?? null,
+      invite_code: generateInviteCode(),
     })
     .select()
     .single();
@@ -233,16 +282,29 @@ export async function leaveTeam(teamId: string): Promise<ActionResult> {
   const user = await requireAuth();
   const db = createAdminClient();
 
-  const { data: membership } = await db
+  const { data: members } = await db
     .from("hackathon_team_members")
     .select("*")
     .eq("team_id", teamId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+    .order("joined_at", { ascending: true });
 
+  const membership = members?.find((m) => m.user_id === user.id);
   if (!membership) return { success: false, error: "You are not on this team." };
+
   if (membership.role === "CAPTAIN") {
-    return { success: false, error: "Transfer captain role before leaving." };
+    // If other members exist, promote the next oldest joiner
+    const others = members?.filter((m) => m.user_id !== user.id);
+    if (others && others.length > 0) {
+      await db
+        .from("hackathon_team_members")
+        .update({ role: "CAPTAIN" })
+        .eq("id", others[0].id);
+    } else {
+      // If last member is captain, delete team
+      await db.from("hackathon_teams").delete().eq("id", teamId);
+      revalidatePath("/hackathon2.0/team");
+      return { success: true, data: null };
+    }
   }
 
   const { error } = await db
@@ -250,6 +312,31 @@ export async function leaveTeam(teamId: string): Promise<ActionResult> {
     .delete()
     .eq("id", membership.id);
 
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/hackathon2.0/team");
+  revalidatePath("/hackathon2.0/dashboard");
+  return { success: true, data: null };
+}
+
+export async function deleteTeam(teamId: string): Promise<ActionResult> {
+  const user = await requireAuth();
+  const db = createAdminClient();
+
+  // Verify user is captain
+  const { data: membership } = await db
+    .from("hackathon_team_members")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("user_id", user.id)
+    .eq("role", "CAPTAIN")
+    .maybeSingle();
+
+  if (!membership && user.role !== "ADMIN") {
+    return { success: false, error: "Only the captain can delete the team." };
+  }
+
+  const { error } = await db.from("hackathon_teams").delete().eq("id", teamId);
   if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon2.0/team");
