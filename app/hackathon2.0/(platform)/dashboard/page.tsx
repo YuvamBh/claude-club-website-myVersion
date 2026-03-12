@@ -64,15 +64,22 @@ export default async function DashboardPage() {
       {/* Announcements */}
       {hackathon.announcements.length > 0 && (
         <div className="mb-6 space-y-2">
-          {hackathon.announcements.slice(0, 2).map((a: any) => (
-            <div
-              key={a.id}
-              className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${
-                a.isPinned
-                  ? "bg-[#ff9b7a]/10 border border-[#ff9b7a]/20"
-                  : "bg-white/5 border border-white/10"
-              }`}
-            >
+          {hackathon.announcements
+            .filter((a: any) => {
+              // Hide pinned "Welcome" style banners if already submitted
+              if (a.isPinned && application && application.status !== "DRAFT") return false;
+              return true;
+            })
+            .slice(0, 2)
+            .map((a: any) => (
+              <div
+                key={a.id}
+                className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${
+                  a.isPinned
+                    ? "bg-[#ff9b7a]/10 border border-[#ff9b7a]/20"
+                    : "bg-white/5 border border-white/10"
+                }`}
+              >
               <Info size={14} className="shrink-0 mt-0.5 text-[#ff9b7a]" />
               <div>
                 <span className="font-medium text-white/80">{a.title}:</span>{" "}

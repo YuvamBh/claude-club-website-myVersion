@@ -164,6 +164,7 @@ export async function getMyApplication(hackathonId: string): Promise<ActionResul
       resumeUrl: data.resume_url ?? "",
       dietaryNeeds: data.dietary_needs ?? "",
       agreedToRules: data.agreed_to_rules ?? false,
+      status: data.status,
     };
     return { success: true, data: camelData };
   }
