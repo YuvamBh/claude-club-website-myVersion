@@ -115,7 +115,7 @@ export const getNavigationItems = (): NavigationItem[] => {
     // Conditional pages
     {
       label: "Hackathon",
-      href: "/hackathon",
+      href: "/hackathon2.0",
       description: "View hackathon information and sign up",
       category: "main",
       showInHeader: true,
