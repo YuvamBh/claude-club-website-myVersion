@@ -396,7 +396,7 @@ export default function ApplyPage() {
                   form.resumeUrl 
                     ? "border-green-500/30 bg-green-500/5" 
                     : errors.resumeUrl 
-                    ? "border-red-500/30 bg-red-500/5"
+                    ? "border-[#ff9b7a]/30 bg-[#ff9b7a]/5"
                     : "border-white/10 hover:border-[#ff9b7a]/30 hover:bg-[#ff9b7a]/5"
                 }`}
               >
@@ -428,7 +428,7 @@ export default function ApplyPage() {
                         e.stopPropagation();
                         set("resumeUrl", "");
                       }}
-                      className="mt-2 text-xs text-red-400 hover:text-red-300 flex items-center gap-1 bg-[#1a1a1a] px-2 py-1 rounded border border-white/5"
+                      className="mt-2 text-xs text-[#ff9b7a] hover:text-[#ffb89e] flex items-center gap-1 bg-[#1a1a1a] px-2 py-1 rounded border border-white/5"
                     >
                       <X size={12} /> Remove and replace
                     </button>
@@ -487,7 +487,7 @@ export default function ApplyPage() {
                 </span>
               </label>
               {errors.agreedToRules && (
-                <p className="text-xs text-red-400 mt-1 pl-6">{errors.agreedToRules}</p>
+                <p className="text-xs text-[#ff9b7a] mt-1 pl-6">{errors.agreedToRules}</p>
               )}
             </div>
           </div>
@@ -543,7 +543,7 @@ export default function ApplyPage() {
 
 function inputCls(hasError: boolean) {
   return `w-full bg-[#111] border ${
-    hasError ? "border-red-500/50" : "border-white/10 focus:border-[#ff9b7a]/50"
+    hasError ? "border-[#ff9b7a]/50" : "border-white/10 focus:border-[#ff9b7a]/50"
   } rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
 }
 
@@ -565,7 +565,7 @@ function Field({
         {required && <span className="text-[#ff9b7a] ml-0.5">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+      {error && <p className="text-xs text-[#ff9b7a] mt-1">{error}</p>}
     </div>
   );
 }

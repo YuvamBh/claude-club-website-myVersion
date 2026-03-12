@@ -221,17 +221,17 @@ function DeadlineCard({
         isOver
           ? "border-white/5 bg-white/3"
           : isUrgent
-          ? "border-red-500/20 bg-red-500/5"
+          ? "border-[#ff9b7a]/20 bg-[#ff9b7a]/5"
           : "border-white/10 bg-[#1a1a1a]"
       }`}
     >
       <Clock
         size={18}
-        className={isOver ? "text-white/20" : isUrgent ? "text-red-400" : "text-[#ff9b7a]"}
+        className={isOver ? "text-white/20" : isUrgent ? "text-[#ff9b7a]" : "text-[#ff9b7a]"}
       />
       <div>
         <p className="text-sm text-white/60">{label}</p>
-        <p className={`text-xs mt-0.5 ${isOver ? "text-white/30" : isUrgent ? "text-red-400" : "text-white/40"}`}>
+        <p className={`text-xs mt-0.5 ${isOver ? "text-white/30" : isUrgent ? "text-[#ff9b7a]" : "text-white/40"}`}>
           {date
             ? isOver
               ? `Closed ${Math.abs(daysLeft!)} days ago`
@@ -248,7 +248,7 @@ function StatusBadge({ status }: { status: string }) {
     DRAFT: "bg-white/5 text-white/40",
     SUBMITTED: "bg-blue-500/10 text-blue-400",
     ACCEPTED: "bg-green-500/10 text-green-400",
-    REJECTED: "bg-red-500/10 text-red-400",
+    REJECTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
     WAITLISTED: "bg-yellow-500/10 text-yellow-400",
     UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",

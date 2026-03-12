@@ -34,9 +34,9 @@ function SignInContent() {
           </p>
 
           {errorParam === "domain" && (
-            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start text-left gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-200">
+            <div className="mb-6 p-3 rounded-lg bg-[#ff9b7a]/10 border border-[#ff9b7a]/20 flex items-start text-left gap-3">
+              <AlertCircle className="w-5 h-5 text-[#ff9b7a] shrink-0 mt-0.5" />
+              <p className="text-sm text-[#ff9b7a]">
                 Access restricted. You must use an <strong>@asu.edu</strong> email address to participate in this hackathon.
               </p>
             </div>

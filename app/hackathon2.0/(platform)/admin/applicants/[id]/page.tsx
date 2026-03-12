@@ -274,7 +274,7 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
     DRAFT: "bg-white/5 text-white/40",
     SUBMITTED: "bg-blue-500/10 text-blue-400",
     ACCEPTED: "bg-green-500/10 text-green-400",
-    REJECTED: "bg-red-500/10 text-red-400",
+    REJECTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
     WAITLISTED: "bg-yellow-500/10 text-yellow-400",
     UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
   };
@@ -290,7 +290,7 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
 function statusButtonActive(status: string): string {
   const map: Record<string, string> = {
     ACCEPTED: "bg-green-500/10 border-green-500/30 text-green-400",
-    REJECTED: "bg-red-500/10 border-red-500/30 text-red-400",
+    REJECTED: "bg-[#ff9b7a]/10 border-[#ff9b7a]/30 text-[#ff9b7a]",
     WAITLISTED: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400",
     UNDER_REVIEW: "bg-purple-500/10 border-purple-500/30 text-purple-400",
   };

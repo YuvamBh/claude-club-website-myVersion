@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 const HACKATHON_ID = process.env.NEXT_PUBLIC_HACKATHON_ID ?? "hackathon_placeholder";
+const SUBMISSION_LOCKED = process.env.NEXT_PUBLIC_SUBMISSION_LOCKED === "true";
 
 const STEPS = [
   { number: 1, label: "Project Info" },
@@ -245,8 +246,10 @@ export default function SubmitPage() {
     );
   }
 
-  // Read-only logic: captains have full control, others just see.
-  const isReadOnly = !isCaptain;
+  // Read-only logic: captains have full control (unless locked), others just see.
+  // Global lock applies to everyone except admins (but client-side we just follow the flag)
+  const isLocked = SUBMISSION_LOCKED;
+  const isReadOnly = !isCaptain || isLocked;
 
   if (submitted) {
     return (
@@ -291,12 +294,22 @@ export default function SubmitPage() {
       </div>
 
       {error && (
-        <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg">
+        <div className="mb-4 px-4 py-3 bg-[#ff9b7a]/10 border border-[#ff9b7a]/20 text-[#ff9b7a] text-sm rounded-lg">
           {error}
         </div>
       )}
 
-      {isReadOnly && (
+      {isLocked ? (
+        <div className="mb-6 px-4 py-3 bg-[#ff9b7a]/10 border border-[#ff9b7a]/20 rounded-lg flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/20 flex items-center justify-center shrink-0">
+            <X size={14} className="text-[#ff9b7a]" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[#ff9b7a]">Submissions are not open yet</p>
+            <p className="text-xs text-white/40">The submission window is currently closed. You can view your draft, but cannot make changes.</p>
+          </div>
+        </div>
+      ) : isReadOnly && (
         <div className="mb-6 px-4 py-3 bg-[#ff9b7a]/5 border border-[#ff9b7a]/10 rounded-lg flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/10 flex items-center justify-center shrink-0">
             <Presentation size={14} className="text-[#ff9b7a]" />
@@ -589,7 +602,7 @@ export default function SubmitPage() {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function inputCls(error?: boolean) {
-  return `w-full bg-[#111] border ${error ? "border-red-500/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
+  return `w-full bg-[#111] border ${error ? "border-[#ff9b7a]/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
 }
 
 function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
@@ -600,7 +613,7 @@ function Field({ label, required, error, children }: { label: string; required?:
         {required && <span className="text-[#ff9b7a] ml-0.5">*</span>}
       </label>
       {children}
-      {error && <p className="text-[10px] text-red-400 mt-1">{error}</p>}
+      {error && <p className="text-[10px] text-[#ff9b7a] mt-1">{error}</p>}
     </div>
   );
 }
@@ -621,11 +634,11 @@ function LinkField({
   return (
     <Field label={label} required={required} error={error}>
       <div className="flex items-center gap-2">
-        <div className={`w-8 h-9 flex items-center justify-center ${error ? "text-red-400 border-red-500/50" : "text-white/20 border-white/10"} border bg-white/5 rounded-l-lg border-r-0`}>
+        <div className={`w-8 h-9 flex items-center justify-center ${error ? "text-[#ff9b7a] border-[#ff9b7a]/50" : "text-white/20 border-white/10"} border bg-white/5 rounded-l-lg border-r-0`}>
           <Icon size={14} />
         </div>
         <input
-          className={`flex-1 bg-[#111] border ${error ? "border-red-500/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-r-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`}
+          className={`flex-1 bg-[#111] border ${error ? "border-[#ff9b7a]/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-r-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`}
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}

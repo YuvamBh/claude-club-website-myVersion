@@ -106,7 +106,7 @@ function AnnouncementsTab() {
         <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-5 mb-4">
           <h3 className="text-sm font-semibold text-white mb-4">New Announcement</h3>
           {error && (
-            <div className="text-xs text-red-400 mb-3">{error}</div>
+            <div className="text-xs text-[#ff9b7a] mb-3">{error}</div>
           )}
           <div className="space-y-4">
             <div>

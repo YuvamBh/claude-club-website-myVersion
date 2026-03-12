@@ -425,6 +425,10 @@ export async function saveSubmission(
     return { success: false, error: "Only the team captain can manage submissions." };
   }
 
+  if (process.env.NEXT_PUBLIC_SUBMISSION_LOCKED === "true" && user.role !== "ADMIN") {
+    return { success: false, error: "Submissions are currently locked." };
+  }
+
   // Check submission deadline
   if (parsed.data.submit) {
     const { data: hackathon } = await db

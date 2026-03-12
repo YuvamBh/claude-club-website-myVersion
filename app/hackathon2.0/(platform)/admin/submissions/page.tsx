@@ -200,7 +200,7 @@ function StatusBadge({ status }: { status: string }) {
     UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
     WINNER: "bg-yellow-400/20 text-yellow-300",
-    DISQUALIFIED: "bg-red-500/10 text-red-400",
+    DISQUALIFIED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
   };
   return (
     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${map[status] ?? "bg-white/5 text-white/40"}`}>

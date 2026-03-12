@@ -242,7 +242,7 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
     UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
     WINNER: "bg-yellow-400/20 text-yellow-300",
-    DISQUALIFIED: "bg-red-500/10 text-red-400",
+    DISQUALIFIED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
   };
   return (
     <span className={`font-medium rounded-full ${map[status] ?? "bg-white/5 text-white/40"} ${large ? "text-xs px-3 py-1" : "text-[10px] px-2 py-0.5"}`}>
@@ -256,7 +256,7 @@ function statusActiveClass(s: string): string {
     UNDER_REVIEW: "bg-purple-500/10 border-purple-500/30 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 border-[#ff9b7a]/30 text-[#ff9b7a]",
     WINNER: "bg-yellow-400/10 border-yellow-400/30 text-yellow-300",
-    DISQUALIFIED: "bg-red-500/10 border-red-500/30 text-red-400",
+    DISQUALIFIED: "bg-[#ff9b7a]/10 border-[#ff9b7a]/30 text-[#ff9b7a]",
   };
   return map[s] ?? "";
 }
