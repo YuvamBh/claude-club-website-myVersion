@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/hackathon/rbac";
-import { getAdminStats, getActiveHackathon, getAllApplications } from "@/lib/hackathon/queries";
-import { prisma } from "@/lib/prisma";
-import { Users, FileText, Send, ClipboardList, Clock, TrendingUp } from "lucide-react";
+import { getAdminStats, getActiveHackathon } from "@/lib/hackathon/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { Users, Send, ClipboardList, Clock, TrendingUp } from "lucide-react";
 
 export const metadata = { title: "Admin Overview — HackASU" };
 
@@ -18,29 +18,34 @@ export default async function AdminPage() {
   }
 
   const stats = await getAdminStats(hackathon.id);
+  const db = createAdminClient();
 
   // Recent applicants
-  const recentApplications = await prisma.application.findMany({
-    where: { hackathonId: hackathon.id },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    include: { user: true },
-  });
+  const { data: recentApplicationsData } = await db
+    .from("hackathon_applications")
+    .select("id, status, created_at, hackathon_users(name, email)")
+    .eq("hackathon_id", hackathon.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recentApplications: any[] = recentApplicationsData ?? [];
 
   // Recent submissions
-  const recentSubmissions = await prisma.submission.findMany({
-    where: { hackathonId: hackathon.id },
-    orderBy: { updatedAt: "desc" },
-    take: 5,
-    include: { team: true },
-  });
+  const { data: recentSubmissionsData } = await db
+    .from("hackathon_submissions")
+    .select("id, status, project_name, updated_at, hackathon_teams(name)")
+    .eq("hackathon_id", hackathon.id)
+    .order("updated_at", { ascending: false })
+    .limit(5);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recentSubmissions: any[] = recentSubmissionsData ?? [];
 
   const now = new Date();
-  const appDaysLeft = hackathon.applicationDeadline
-    ? Math.ceil((hackathon.applicationDeadline.getTime() - now.getTime()) / 86400000)
+  const appDaysLeft = hackathon.application_deadline
+    ? Math.ceil((new Date(hackathon.application_deadline).getTime() - now.getTime()) / 86400000)
     : null;
-  const subDaysLeft = hackathon.submissionDeadline
-    ? Math.ceil((hackathon.submissionDeadline.getTime() - now.getTime()) / 86400000)
+  const subDaysLeft = hackathon.submission_deadline
+    ? Math.ceil((new Date(hackathon.submission_deadline).getTime() - now.getTime()) / 86400000)
     : null;
 
   return (
@@ -86,12 +91,12 @@ export default async function AdminPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <DeadlineCard
           label="Application Deadline"
-          date={hackathon.applicationDeadline}
+          date={hackathon.application_deadline ? new Date(hackathon.application_deadline) : null}
           daysLeft={appDaysLeft}
         />
         <DeadlineCard
           label="Submission Deadline"
-          date={hackathon.submissionDeadline}
+          date={hackathon.submission_deadline ? new Date(hackathon.submission_deadline) : null}
           daysLeft={subDaysLeft}
         />
       </div>
@@ -115,14 +120,15 @@ export default async function AdminPage() {
             {recentApplications.length === 0 ? (
               <p className="text-sm text-white/30">No applications yet.</p>
             ) : (
-              recentApplications.map((app) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              recentApplications.map((app: any) => (
                 <div
                   key={app.id}
                   className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
                 >
                   <div>
-                    <p className="text-sm text-white/70">{app.user.name}</p>
-                    <p className="text-xs text-white/30">{app.user.email}</p>
+                    <p className="text-sm text-white/70">{app.hackathon_users?.name}</p>
+                    <p className="text-xs text-white/30">{app.hackathon_users?.email}</p>
                   </div>
                   <StatusBadge status={app.status} />
                 </div>
@@ -148,16 +154,17 @@ export default async function AdminPage() {
             {recentSubmissions.length === 0 ? (
               <p className="text-sm text-white/30">No submissions yet.</p>
             ) : (
-              recentSubmissions.map((sub) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              recentSubmissions.map((sub: any) => (
                 <div
                   key={sub.id}
                   className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
                 >
                   <div>
                     <p className="text-sm text-white/70">
-                      {sub.projectName ?? "Untitled"}
+                      {sub.project_name ?? "Untitled"}
                     </p>
-                    <p className="text-xs text-white/30">{sub.team.name}</p>
+                    <p className="text-xs text-white/30">{sub.hackathon_teams?.name}</p>
                   </div>
                   <StatusBadge status={sub.status} />
                 </div>
@@ -178,7 +185,8 @@ function StatCard({
   value,
   sub,
 }: {
-  icon: React.ElementType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: any;
   label: string;
   value: number | string;
   sub: string;

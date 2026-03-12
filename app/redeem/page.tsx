@@ -79,7 +79,7 @@ export default function RedeemPage() {
               animate="visible"
             >
               <Heading level="h1" animate={false} className="leading-tight mb-2">
-                Free <span className="text-[var(--theme-text-accent)] font-bold">Claude Pro + API Credits</span>
+                Free <span className="text-(--theme-text-accent) font-bold">Claude Pro + API Credits</span>
               </Heading>
             </motion.div>
             <motion.div

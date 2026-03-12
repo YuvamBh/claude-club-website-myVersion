@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHackathonUser } from "@/lib/hackathon/rbac";
-import { getUserTeam, getTeamSubmission, getActiveHackathon } from "@/lib/hackathon/queries";
-import { prisma } from "@/lib/prisma";
+import { getUserTeam, getActiveHackathon, getTracks } from "@/lib/hackathon/queries";
 
 /**
  * GET /api/hackathon/submission/me
@@ -17,34 +16,22 @@ export async function GET() {
   const team = await getUserTeam(user.id, hackathon.id);
   if (!team) return NextResponse.json({ team: null, submission: null, isCaptain: false });
 
-  const submission = await getTeamSubmission(team.id);
-  const isCaptain = team.members.some(
-    (m) => m.userId === user.id && m.role === "CAPTAIN"
+  const submission = (team as { hackathon_submissions?: unknown }).hackathon_submissions ?? null;
+  const members = (team as { hackathon_team_members?: { user_id: string; role: string }[] }).hackathon_team_members ?? [];
+  
+  const isCaptain = members.some(
+    (m) => m.user_id === user.id && m.role === "CAPTAIN"
   );
 
   // Fetch tracks for the submission form
-  const tracks = await prisma.track.findMany({
-    where: { hackathonId: hackathon.id },
-    select: { id: true, name: true },
-  });
+  const tracks = await getTracks(hackathon.id);
 
   // Safe serialization
   const safeTeam = {
-    id: team.id,
-    name: team.name,
+    id: (team as { id: string }).id,
+    name: (team as { name: string }).name,
     tracks,
   };
 
-  const safeSubmission = submission
-    ? {
-        ...submission,
-        createdAt: submission.createdAt.toISOString(),
-        updatedAt: submission.updatedAt.toISOString(),
-        submittedAt: submission.submittedAt?.toISOString() ?? null,
-        agreedAt: submission.agreedAt?.toISOString() ?? null,
-        reviewedAt: submission.reviewedAt?.toISOString() ?? null,
-      }
-    : null;
-
-  return NextResponse.json({ team: safeTeam, submission: safeSubmission, isCaptain });
+  return NextResponse.json({ team: safeTeam, submission, isCaptain });
 }

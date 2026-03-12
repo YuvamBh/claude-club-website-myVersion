@@ -43,9 +43,12 @@ export default async function AdminTeamsPage() {
               </tr>
             ) : (
               teams.map((team) => {
-                const captain = team.members.find((m) => m.role === "CAPTAIN");
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const captain = team.members.find((m: any) => m.role === "CAPTAIN");
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const submittedMembers = team.members.filter(
-                  (m) => m.user.application?.status === "SUBMITTED" || m.user.application?.status === "ACCEPTED"
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (m: any) => m.user.application?.status === "SUBMITTED" || m.user.application?.status === "ACCEPTED"
                 );
                 return (
                   <tr
@@ -72,7 +75,8 @@ export default async function AdminTeamsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex -space-x-1.5">
-                        {team.members.slice(0, 4).map((m) => (
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        {team.members.slice(0, 4).map((m: any) => (
                           <div
                             key={m.id}
                             className="w-6 h-6 rounded-full bg-[#1a1a1a] border border-white/20 flex items-center justify-center"

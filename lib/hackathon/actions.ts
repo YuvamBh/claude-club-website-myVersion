@@ -7,14 +7,14 @@
  * 1. Authentication check (requireAuth)
  * 2. Authorization check (RBAC)
  * 3. Zod validation
- * 4. Prisma mutation
+ * 4. Supabase mutation
  * 5. Structured return: { success, data?, error? }
  */
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
-import { requireAuth, requireAdmin, canEditSubmission, canManageTeam } from "./rbac";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth, requireAdmin, canManageTeam } from "./rbac";
 
 type ActionResult<T = unknown> =
   | { success: true; data: T }
@@ -37,7 +37,7 @@ const ApplicationSchema = z.object({
   dietaryNeeds: z.string().optional(),
   accessibilityNeeds: z.string().optional(),
   agreedToRules: z.boolean().refine((v) => v, "You must agree to the rules"),
-  submit: z.boolean().default(false), // false = save draft, true = submit
+  submit: z.boolean().default(false),
 });
 
 export async function saveApplication(
@@ -46,31 +46,46 @@ export async function saveApplication(
   const user = await requireAuth();
   const parsed = ApplicationSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const { submit, ...data } = parsed.data;
+  const { submit, hackathonId, ...rest } = parsed.data;
+  const db = createAdminClient();
+  const now = new Date().toISOString();
 
-  const application = await prisma.application.upsert({
-    where: { userId: user.id },
-    create: {
-      userId: user.id,
-      ...data,
-      status: submit ? "SUBMITTED" : "DRAFT",
-      submittedAt: submit ? new Date() : null,
-      agreedAt: data.agreedToRules ? new Date() : null,
-    },
-    update: {
-      ...data,
-      status: submit ? "SUBMITTED" : "DRAFT",
-      submittedAt: submit ? new Date() : undefined,
-      agreedAt: data.agreedToRules ? new Date() : null,
-    },
-  });
+  const payload = {
+    user_id: user.id,
+    hackathon_id: hackathonId,
+    university: rest.university,
+    major: rest.major,
+    year: rest.year,
+    experience_level: rest.experienceLevel,
+    desired_tracks: rest.desiredTracks,
+    prior_experience: rest.priorExperience ?? null,
+    why_join: rest.whyJoin,
+    linkedin_url: rest.linkedinUrl || null,
+    github_url: rest.githubUrl || null,
+    resume_url: rest.resumeUrl || null,
+    dietary_needs: rest.dietaryNeeds ?? null,
+    accessibility_needs: rest.accessibilityNeeds ?? null,
+    agreed_to_rules: rest.agreedToRules,
+    agreed_at: rest.agreedToRules ? now : null,
+    status: submit ? "SUBMITTED" : "DRAFT",
+    submitted_at: submit ? now : null,
+    updated_at: now,
+  };
+
+  const { data, error } = await db
+    .from("hackathon_applications")
+    .upsert(payload, { onConflict: "user_id" })
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/dashboard");
   revalidatePath("/hackathon/apply");
-  return { success: true, data: application };
+  return { success: true, data };
 }
 
 // ─── Team ─────────────────────────────────────────────────────────────────────
@@ -87,23 +102,44 @@ export async function createTeam(
   const user = await requireAuth();
   const parsed = CreateTeamSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
-  // Check user isn't already on a team for this hackathon
-  const existing = await prisma.teamMember.findFirst({
-    where: { userId: user.id, team: { hackathonId: parsed.data.hackathonId } },
-  });
-  if (existing) return { success: false, error: "You are already on a team." };
+  const db = createAdminClient();
 
-  const team = await prisma.team.create({
-    data: {
-      ...parsed.data,
-      members: {
-        create: { userId: user.id, role: "CAPTAIN" },
-      },
-    },
+  // Check user isn't already on a team for this hackathon
+  const { data: existingMembership } = await db
+    .from("hackathon_team_members")
+    .select("id, hackathon_teams!inner(hackathon_id)")
+    .eq("user_id", user.id)
+    .eq("hackathon_teams.hackathon_id", parsed.data.hackathonId)
+    .maybeSingle();
+
+  if (existingMembership) {
+    return { success: false, error: "You are already on a team." };
+  }
+
+  // Create team
+  const { data: team, error: teamError } = await db
+    .from("hackathon_teams")
+    .insert({
+      hackathon_id: parsed.data.hackathonId,
+      name: parsed.data.name,
+      track_id: parsed.data.trackId ?? null,
+    })
+    .select()
+    .single();
+
+  if (teamError) return { success: false, error: teamError.message };
+
+  // Add creator as CAPTAIN
+  const { error: memberError } = await db.from("hackathon_team_members").insert({
+    team_id: team.id,
+    user_id: user.id,
+    role: "CAPTAIN",
   });
+
+  if (memberError) return { success: false, error: memberError.message };
 
   revalidatePath("/hackathon/team");
   revalidatePath("/hackathon/dashboard");
@@ -115,25 +151,44 @@ export async function joinTeam(
   hackathonId: string
 ): Promise<ActionResult> {
   const user = await requireAuth();
+  const db = createAdminClient();
 
-  const team = await prisma.team.findUnique({ where: { inviteCode } });
+  const { data: team } = await db
+    .from("hackathon_teams")
+    .select("*")
+    .eq("invite_code", inviteCode)
+    .maybeSingle();
+
   if (!team) return { success: false, error: "Invalid invite code." };
-  if (team.hackathonId !== hackathonId)
+  if (team.hackathon_id !== hackathonId)
     return { success: false, error: "This code is for a different hackathon." };
-  if (team.isLocked) return { success: false, error: "This team is locked." };
+  if (team.is_locked) return { success: false, error: "This team is locked." };
 
-  const memberCount = await prisma.teamMember.count({ where: { teamId: team.id } });
-  if (memberCount >= team.maxSize)
+  const { count: memberCount } = await db
+    .from("hackathon_team_members")
+    .select("*", { count: "exact", head: true })
+    .eq("team_id", team.id);
+
+  if ((memberCount ?? 0) >= team.max_size)
     return { success: false, error: "This team is full." };
 
-  const alreadyOnTeam = await prisma.teamMember.findFirst({
-    where: { userId: user.id, team: { hackathonId } },
-  });
+  // Check not already on a team in this hackathon
+  const { data: alreadyOnTeam } = await db
+    .from("hackathon_team_members")
+    .select("id, hackathon_teams!inner(hackathon_id)")
+    .eq("user_id", user.id)
+    .eq("hackathon_teams.hackathon_id", hackathonId)
+    .maybeSingle();
+
   if (alreadyOnTeam) return { success: false, error: "You are already on a team." };
 
-  const membership = await prisma.teamMember.create({
-    data: { teamId: team.id, userId: user.id, role: "MEMBER" },
-  });
+  const { data: membership, error } = await db
+    .from("hackathon_team_members")
+    .insert({ team_id: team.id, user_id: user.id, role: "MEMBER" })
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/team");
   revalidatePath("/hackathon/dashboard");
@@ -142,19 +197,26 @@ export async function joinTeam(
 
 export async function leaveTeam(teamId: string): Promise<ActionResult> {
   const user = await requireAuth();
+  const db = createAdminClient();
 
-  const membership = await prisma.teamMember.findFirst({
-    where: { teamId, userId: user.id },
-  });
+  const { data: membership } = await db
+    .from("hackathon_team_members")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   if (!membership) return { success: false, error: "You are not on this team." };
   if (membership.role === "CAPTAIN") {
-    return {
-      success: false,
-      error: "Transfer captain role before leaving.",
-    };
+    return { success: false, error: "Transfer captain role before leaving." };
   }
 
-  await prisma.teamMember.delete({ where: { id: membership.id } });
+  const { error } = await db
+    .from("hackathon_team_members")
+    .delete()
+    .eq("id", membership.id);
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/team");
   revalidatePath("/hackathon/dashboard");
@@ -166,23 +228,31 @@ export async function transferCaptain(
   newCaptainUserId: string
 ): Promise<ActionResult> {
   const user = await requireAuth();
+  const db = createAdminClient();
 
-  const myMembership = await prisma.teamMember.findFirst({
-    where: { teamId, userId: user.id },
-  });
-  if (!canManageTeam(user, myMembership?.userId ?? ""))
+  const { data: myMembership } = await db
+    .from("hackathon_team_members")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!canManageTeam(user, myMembership?.user_id ?? ""))
     return { success: false, error: "Only the captain can transfer." };
 
-  await prisma.$transaction([
-    prisma.teamMember.updateMany({
-      where: { teamId, userId: user.id },
-      data: { role: "MEMBER" },
-    }),
-    prisma.teamMember.updateMany({
-      where: { teamId, userId: newCaptainUserId },
-      data: { role: "CAPTAIN" },
-    }),
-  ]);
+  // Demote current captain
+  await db
+    .from("hackathon_team_members")
+    .update({ role: "MEMBER" })
+    .eq("team_id", teamId)
+    .eq("user_id", user.id);
+
+  // Promote new captain
+  await db
+    .from("hackathon_team_members")
+    .update({ role: "CAPTAIN" })
+    .eq("team_id", teamId)
+    .eq("user_id", newCaptainUserId);
 
   revalidatePath("/hackathon/team");
   return { success: true, data: null };
@@ -218,57 +288,82 @@ export async function saveSubmission(
   const user = await requireAuth();
   const parsed = SubmissionSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
+  const db = createAdminClient();
+
   // Verify user is captain of this team
-  const captainMembership = await prisma.teamMember.findFirst({
-    where: { teamId: parsed.data.teamId, userId: user.id, role: "CAPTAIN" },
-  });
+  const { data: captainMembership } = await db
+    .from("hackathon_team_members")
+    .select("*")
+    .eq("team_id", parsed.data.teamId)
+    .eq("user_id", user.id)
+    .eq("role", "CAPTAIN")
+    .maybeSingle();
+
   if (!captainMembership && user.role !== "ADMIN") {
     return { success: false, error: "Only the team captain can manage submissions." };
   }
 
-  const hackathon = await prisma.hackathon.findUnique({
-    where: { id: parsed.data.hackathonId },
-  });
-
+  // Check submission deadline
   if (parsed.data.submit) {
-    if (hackathon?.submissionDeadline && new Date() > hackathon.submissionDeadline) {
+    const { data: hackathon } = await db
+      .from("hackathons")
+      .select("submission_deadline")
+      .eq("id", parsed.data.hackathonId)
+      .maybeSingle();
+
+    if (hackathon?.submission_deadline && new Date() > new Date(hackathon.submission_deadline)) {
       return { success: false, error: "Submission deadline has passed." };
     }
     if (!parsed.data.agreedToRules) {
       return { success: false, error: "You must agree to the rules before submitting." };
     }
     if (!parsed.data.projectName || !parsed.data.githubUrl) {
-      return {
-        success: false,
-        error: "Project name and GitHub link are required to submit.",
-      };
+      return { success: false, error: "Project name and GitHub link are required to submit." };
     }
   }
 
-  const { submit, ...data } = parsed.data;
+  const { submit, teamId, hackathonId, ...rest } = parsed.data;
+  const now = new Date().toISOString();
 
-  const submission = await prisma.submission.upsert({
-    where: { teamId: parsed.data.teamId },
-    create: {
-      ...data,
-      status: submit ? "SUBMITTED" : "DRAFT",
-      submittedAt: submit ? new Date() : null,
-      agreedAt: data.agreedToRules ? new Date() : null,
-    },
-    update: {
-      ...data,
-      status: submit ? "SUBMITTED" : "DRAFT",
-      submittedAt: submit ? new Date() : undefined,
-      agreedAt: data.agreedToRules ? new Date() : null,
-    },
-  });
+  const payload = {
+    team_id: teamId,
+    hackathon_id: hackathonId,
+    project_name: rest.projectName,
+    tagline: rest.tagline ?? null,
+    track_id: rest.trackId ?? null,
+    short_description: rest.shortDescription ?? null,
+    long_description: rest.longDescription ?? null,
+    problem_statement: rest.problemStatement ?? null,
+    solution_overview: rest.solutionOverview ?? null,
+    tech_stack: rest.techStack,
+    github_url: rest.githubUrl || null,
+    demo_url: rest.demoUrl || null,
+    video_url: rest.videoUrl || null,
+    presentation_url: rest.presentationUrl || null,
+    deployment_url: rest.deploymentUrl || null,
+    design_url: rest.designUrl || null,
+    additional_notes: rest.additionalNotes ?? null,
+    agreed_to_rules: rest.agreedToRules,
+    agreed_at: rest.agreedToRules ? now : null,
+    status: submit ? "SUBMITTED" : "DRAFT",
+    submitted_at: submit ? now : null,
+    updated_at: now,
+  };
+
+  const { data, error } = await db
+    .from("hackathon_submissions")
+    .upsert(payload, { onConflict: "team_id" })
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/submit");
   revalidatePath("/hackathon/dashboard");
-  return { success: true, data: submission };
+  return { success: true, data };
 }
 
 // ─── Admin: Update application status ────────────────────────────────────────
@@ -279,14 +374,23 @@ export async function updateApplicationStatus(
   adminNotes?: string
 ): Promise<ActionResult> {
   await requireAdmin();
+  const db = createAdminClient();
 
-  const application = await prisma.application.update({
-    where: { id: applicationId },
-    data: { status, adminNotes, reviewedAt: new Date() },
-  });
+  const { data, error } = await db
+    .from("hackathon_applications")
+    .update({
+      status,
+      admin_notes: adminNotes ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", applicationId)
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/admin/applicants");
-  return { success: true, data: application };
+  return { success: true, data };
 }
 
 // ─── Admin: Update submission status ─────────────────────────────────────────
@@ -297,14 +401,23 @@ export async function updateSubmissionStatus(
   adminNotes?: string
 ): Promise<ActionResult> {
   await requireAdmin();
+  const db = createAdminClient();
 
-  const submission = await prisma.submission.update({
-    where: { id: submissionId },
-    data: { status, adminNotes, reviewedAt: new Date() },
-  });
+  const { data, error } = await db
+    .from("hackathon_submissions")
+    .update({
+      status,
+      admin_notes: adminNotes ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", submissionId)
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon/admin/submissions");
-  return { success: true, data: submission };
+  return { success: true, data };
 }
 
 // ─── Admin: Upsert hackathon content ─────────────────────────────────────────
@@ -318,28 +431,40 @@ export async function upsertAnnouncement(data: {
   publish?: boolean;
 }): Promise<ActionResult> {
   await requireAdmin();
+  const db = createAdminClient();
+  const now = new Date().toISOString();
 
-  const announcement = data.id
-    ? await prisma.announcement.update({
-        where: { id: data.id },
-        data: {
-          title: data.title,
-          content: data.content,
-          isPinned: data.isPinned ?? false,
-          publishedAt: data.publish ? new Date() : undefined,
-        },
+  let result;
+  if (data.id) {
+    result = await db
+      .from("hackathon_announcements")
+      .update({
+        title: data.title,
+        content: data.content,
+        is_pinned: data.isPinned ?? false,
+        published_at: data.publish ? now : undefined,
+        updated_at: now,
       })
-    : await prisma.announcement.create({
-        data: {
-          hackathonId: data.hackathonId,
-          title: data.title,
-          content: data.content,
-          isPinned: data.isPinned ?? false,
-          publishedAt: data.publish ? new Date() : null,
-        },
-      });
+      .eq("id", data.id)
+      .select()
+      .single();
+  } else {
+    result = await db
+      .from("hackathon_announcements")
+      .insert({
+        hackathon_id: data.hackathonId,
+        title: data.title,
+        content: data.content,
+        is_pinned: data.isPinned ?? false,
+        published_at: data.publish ? now : null,
+      })
+      .select()
+      .single();
+  }
+
+  if (result.error) return { success: false, error: result.error.message };
 
   revalidatePath("/hackathon/dashboard");
   revalidatePath("/hackathon/admin/content");
-  return { success: true, data: announcement };
+  return { success: true, data: result.data };
 }

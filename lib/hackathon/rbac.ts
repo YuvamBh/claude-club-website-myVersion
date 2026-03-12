@@ -1,54 +1,90 @@
 /**
  * Role-Based Access Control for the HackASU platform.
  *
- * Design: Better Auth handles authentication (who you are).
+ * Design: Supabase handles authentication (who you are).
  *         This module handles authorization (what you can do).
  *
- * A HackathonUser row is created on first platform access, keyed to the
- * Better Auth user.id.  Role defaults to PARTICIPANT; set ADMIN manually in DB
- * or via the seed script.
+ * A hackathon_users row is created on first platform access, keyed to the
+ * Supabase auth user.id. Role defaults to PARTICIPANT; set ADMIN manually in DB.
  */
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import type { HackathonUser } from "@prisma/client";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export type HackathonRole = "PARTICIPANT" | "ADMIN" | "JUDGE" | "ORGANIZER" | "MENTOR";
+
+export interface HackathonUser {
+  id: string;
+  user_id: string;
+  email: string;
+  name: string;
+  role: HackathonRole;
+  created_at: string;
+  updated_at: string;
+}
 
 // ─── Session helpers ─────────────────────────────────────────────────────────
 
-/** Returns the raw Better Auth session, or null. */
-export async function getSession() {
-  return auth.api.getSession({ headers: await headers() });
-}
-
 /**
- * Returns the HackathonUser for the current Better Auth session.
+ * Returns the HackathonUser for the current Supabase session.
  * Creates the row on first access (upsert pattern).
  * Returns null when not authenticated.
  */
 export async function getHackathonUser(): Promise<HackathonUser | null> {
-  const session = await getSession();
-  if (!session?.user) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  const { id: userId, email, name } = session.user;
+  const { id: userId, email, user_metadata } = user;
+  const name =
+    user_metadata?.full_name ??
+    user_metadata?.name ??
+    email?.split("@")[0] ??
+    "Anonymous";
 
-  return prisma.hackathonUser.upsert({
-    where: { userId },
-    create: { userId, email: email ?? "", name: name ?? "Anonymous" },
-    update: { email: email ?? "", name: name ?? "Anonymous" },
-  });
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("hackathon_users")
+    .upsert(
+      { user_id: userId, email: email ?? "", name },
+      { onConflict: "user_id", ignoreDuplicates: false }
+    )
+    .select()
+    .single();
+
+  if (error) {
+    // If it fails with concurrent unique constraint violation on email (23505),
+    // it means a concurrent request already created the row. Fetch it.
+    if (error.code === "23505") {
+      const { data: existingData } = await admin
+        .from("hackathon_users")
+        .select()
+        .eq("user_id", userId)
+        .single();
+      
+      if (existingData) return existingData as HackathonUser;
+    }
+    console.error("getHackathonUser upsert error:", error);
+    return null;
+  }
+
+  return data as HackathonUser;
 }
 
 // ─── Guards ──────────────────────────────────────────────────────────────────
 
 /**
  * Server-side auth guard for any platform page.
- * Redirects to /api/auth/signin if not authenticated.
+ * Redirects to /hackathon/signin if not authenticated.
  */
 export async function requireAuth(): Promise<HackathonUser> {
   const user = await getHackathonUser();
-  if (!user) redirect("/api/auth/signin");
+  if (!user) redirect("/hackathon/signin");
   return user;
 }
 

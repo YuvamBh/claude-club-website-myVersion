@@ -150,7 +150,8 @@ export default async function ApplicantDetailPage({
           {/* Tracks */}
           <Section title="Desired Tracks">
             <div className="flex flex-wrap gap-1.5">
-              {(application.desiredTracks ?? []).map((t) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              {(application.desiredTracks ?? []).map((t: any) => (
                 <span
                   key={t}
                   className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2.5 py-1 rounded-full"
@@ -254,7 +255,8 @@ function ExternalLinkItem({
   label,
   href,
 }: {
-  icon: React.ElementType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: any;
   label: string;
   href: string;
 }) {

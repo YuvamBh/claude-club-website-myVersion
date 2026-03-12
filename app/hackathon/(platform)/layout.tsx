@@ -1,17 +1,17 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getHackathonUser } from "@/lib/hackathon/rbac";
+import { SignOutButton } from "./SignOutButton";
 import {
   LayoutDashboard,
   ClipboardList,
   Users,
   Send,
-  ShieldCheck,
   BarChart3,
   FileText,
   Settings,
-  LogOut,
   Trophy,
+  type LucideIcon,
 } from "lucide-react";
 
 export default async function PlatformLayout({
@@ -20,7 +20,7 @@ export default async function PlatformLayout({
   children: React.ReactNode;
 }) {
   const user = await getHackathonUser();
-  if (!user) redirect("/api/auth/signin");
+  if (!user) redirect("/hackathon/signin");
 
   const isAdmin = user.role === "ADMIN";
 
@@ -53,7 +53,7 @@ export default async function PlatformLayout({
               <p className="text-[10px] uppercase tracking-widest text-white/30 px-2 pb-1.5 pt-4">
                 Admin
               </p>
-              <NavItem href="/hackathon/admin" icon={BarChart3} label="Overview" exact />
+              <NavItem href="/hackathon/admin" icon={BarChart3} label="Overview" />
               <NavItem href="/hackathon/admin/applicants" icon={FileText} label="Applicants" />
               <NavItem href="/hackathon/admin/teams" icon={Users} label="Teams" />
               <NavItem href="/hackathon/admin/submissions" icon={Send} label="Submissions" />
@@ -80,13 +80,7 @@ export default async function PlatformLayout({
               </span>
             )}
           </div>
-          <a
-            href="/api/auth/signout"
-            className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors"
-          >
-            <LogOut size={13} />
-            Sign out
-          </a>
+          <SignOutButton />
         </div>
       </aside>
 
@@ -102,12 +96,10 @@ function NavItem({
   href,
   icon: Icon,
   label,
-  exact = false,
 }: {
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   label: string;
-  exact?: boolean;
 }) {
   return (
     <Link

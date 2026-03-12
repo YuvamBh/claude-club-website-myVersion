@@ -127,7 +127,8 @@ export default async function AdminApplicantsPage({
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <div className="flex flex-wrap gap-1">
-                        {(app.desiredTracks ?? []).slice(0, 2).map((t) => (
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        {(app.desiredTracks ?? []).slice(0, 2).map((t: any) => (
                           <span
                             key={t}
                             className="text-[10px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded"

@@ -552,7 +552,8 @@ function LinkField({
   label, icon: Icon, placeholder, value, onChange, required,
 }: {
   label: string;
-  icon: React.ElementType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: any;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
