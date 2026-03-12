@@ -161,7 +161,7 @@ export default async function AdminSubmissionsPage({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/hackathon/admin/submissions/${sub.id}`}
+                      href={`/hackathon2.0/admin/submissions/${sub.id}`}
                       className="text-xs text-[#ff9b7a] hover:text-[#ffb89e] flex items-center gap-1 transition-colors"
                     >
                       View <ExternalLink size={11} />
@@ -181,7 +181,7 @@ function StatusFilter({ status, current, label }: { status: string; current?: st
   const active = status === (current ?? "");
   return (
     <a
-      href={`/hackathon/admin/submissions${status ? `?status=${status}` : ""}`}
+      href={`/hackathon2.0/admin/submissions${status ? `?status=${status}` : ""}`}
       className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
         active
           ? "bg-[#ff9b7a]/20 border-[#ff9b7a]/40 text-[#ff9b7a]"

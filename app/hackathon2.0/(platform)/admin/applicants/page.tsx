@@ -127,7 +127,6 @@ export default async function AdminApplicantsPage({
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <div className="flex flex-wrap gap-1">
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         {(app.desiredTracks ?? []).slice(0, 2).map((t: any) => (
                           <span
                             key={t}
@@ -150,7 +149,7 @@ export default async function AdminApplicantsPage({
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        href={`/hackathon/admin/applicants/${app.id}`}
+                        href={`/hackathon2.0/admin/applicants/${app.id}`}
                         className="text-xs text-[#ff9b7a] hover:text-[#ffb89e] transition-colors flex items-center gap-1"
                       >
                         View <ExternalLink size={11} />
@@ -179,7 +178,7 @@ function StatusFilter({
   const active = status === (current ?? "");
   return (
     <a
-      href={`/hackathon/admin/applicants${status ? `?status=${status}` : ""}`}
+      href={`/hackathon2.0/admin/applicants${status ? `?status=${status}` : ""}`}
       className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
         active
           ? "bg-[#ff9b7a]/20 border-[#ff9b7a]/40 text-[#ff9b7a]"

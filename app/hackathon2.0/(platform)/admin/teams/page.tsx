@@ -43,11 +43,8 @@ export default async function AdminTeamsPage() {
               </tr>
             ) : (
               teams.map((team) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const captain = team.members.find((m: any) => m.role === "CAPTAIN");
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const submittedMembers = team.members.filter(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (m: any) => m.user.application?.status === "SUBMITTED" || m.user.application?.status === "ACCEPTED"
                 );
                 return (
@@ -75,8 +72,7 @@ export default async function AdminTeamsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex -space-x-1.5">
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        {team.members.slice(0, 4).map((m: any) => (
+                        {(team.members.slice(0, 4) as any[]).map((m: any) => (
                           <div
                             key={m.id}
                             className="w-6 h-6 rounded-full bg-[#1a1a1a] border border-white/20 flex items-center justify-center"
@@ -100,7 +96,7 @@ export default async function AdminTeamsPage() {
                     <td className="px-4 py-3">
                       {team.submission ? (
                         <Link
-                          href={`/hackathon/admin/submissions/${team.submission.id}`}
+                          href={`/hackathon2.0/admin/submissions/${team.submission.id}`}
                           className="flex items-center gap-1 text-xs text-[#ff9b7a] hover:text-[#ffb89e] transition-colors"
                         >
                           <Send size={11} />

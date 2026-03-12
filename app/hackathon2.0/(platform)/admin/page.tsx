@@ -27,7 +27,6 @@ export default async function AdminPage() {
     .eq("hackathon_id", hackathon.id)
     .order("created_at", { ascending: false })
     .limit(5);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recentApplications: any[] = recentApplicationsData ?? [];
 
   // Recent submissions
@@ -37,7 +36,6 @@ export default async function AdminPage() {
     .eq("hackathon_id", hackathon.id)
     .order("updated_at", { ascending: false })
     .limit(5);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recentSubmissions: any[] = recentSubmissionsData ?? [];
 
   const now = new Date();
@@ -120,7 +118,6 @@ export default async function AdminPage() {
             {recentApplications.length === 0 ? (
               <p className="text-sm text-white/30">No applications yet.</p>
             ) : (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               recentApplications.map((app: any) => (
                 <div
                   key={app.id}
@@ -154,7 +151,6 @@ export default async function AdminPage() {
             {recentSubmissions.length === 0 ? (
               <p className="text-sm text-white/30">No submissions yet.</p>
             ) : (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               recentSubmissions.map((sub: any) => (
                 <div
                   key={sub.id}
@@ -185,7 +181,6 @@ function StatCard({
   value,
   sub,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   label: string;
   value: number | string;

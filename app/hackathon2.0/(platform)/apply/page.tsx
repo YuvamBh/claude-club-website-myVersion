@@ -12,7 +12,6 @@ const EXPERIENCE_LEVELS = [
   { value: "advanced", label: "Advanced - Shipped products or multiple hackathons" },
 ];
 
-// Replace with your real hackathon ID from DB / env
 const HACKATHON_ID = process.env.NEXT_PUBLIC_HACKATHON_ID ?? "hackathon_placeholder";
 
 interface FormState {

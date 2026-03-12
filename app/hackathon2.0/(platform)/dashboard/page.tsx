@@ -48,7 +48,6 @@ export default async function DashboardPage() {
   const subDeadlinePassed =
     hackathon.submissionDeadline && now > hackathon.submissionDeadline;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const captain = team?.members.find((m: any) => m.role === "CAPTAIN");
   const isCaptain = captain?.userId === user.id;
 

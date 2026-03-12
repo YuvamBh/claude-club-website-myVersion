@@ -26,7 +26,6 @@ export default async function ApplicantDetailPage({
   if (!application) notFound();
 
   const user = application.user;
-  const profile = user.profile;
 
   async function handleStatus(formData: FormData) {
     "use server";
@@ -150,7 +149,6 @@ export default async function ApplicantDetailPage({
           {/* Tracks */}
           <Section title="Desired Tracks">
             <div className="flex flex-wrap gap-1.5">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               {(application.desiredTracks ?? []).map((t: any) => (
                 <span
                   key={t}
@@ -250,7 +248,6 @@ function ExternalLinkItem({
   label,
   href,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   label: string;
   href: string;

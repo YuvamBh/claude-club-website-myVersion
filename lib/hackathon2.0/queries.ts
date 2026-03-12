@@ -158,7 +158,14 @@ export async function getApplicationById(id: string) {
   if (!data) return null;
 
   const n = normalize(data) as Row;
-  return n;
+  return {
+    ...n,
+    user: normalize(data.hackathon_users ?? {}),
+    createdAt: new Date(data.created_at),
+    submittedAt: data.submitted_at ? new Date(data.submitted_at) : null,
+    reviewedAt: data.reviewed_at ? new Date(data.reviewed_at) : null,
+    agreedAt: data.agreed_at ? new Date(data.agreed_at) : null,
+  } as any;
 }
 
 export async function getAllApplications(hackathonId: string) {
@@ -185,6 +192,8 @@ export async function getAllApplications(hackathonId: string) {
             ?.find((x: Row) => x.id === tm.id)?.hackathon_teams ?? null),
         })),
       },
+      submittedAt: app.submitted_at ? new Date(app.submitted_at) : null,
+      createdAt: new Date(app.created_at),
     } as any;
   });
 }
@@ -351,6 +360,9 @@ export async function getSubmissionById(id: string) {
         user: normalize(m.hackathon_users ?? {}),
       })),
     } : null,
+    submittedAt: data.submitted_at ? new Date(data.submitted_at) : null,
+    updatedAt: data.updated_at ? new Date(data.updated_at) : null,
+    reviewedAt: data.reviewed_at ? new Date(data.reviewed_at) : null,
   } as any;
 }
 
@@ -379,6 +391,8 @@ export async function getAllSubmissions(hackathonId: string) {
           user: normalize(m.hackathon_users ?? {}),
         })),
       } : null,
+      submittedAt: sub.submitted_at ? new Date(sub.submitted_at) : null,
+      updatedAt: sub.updated_at ? new Date(sub.updated_at) : null,
     } as any;
   });
 }
