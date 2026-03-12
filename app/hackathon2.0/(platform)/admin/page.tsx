@@ -3,7 +3,7 @@ import { getAdminStats, getActiveHackathon } from "@/lib/hackathon2.0/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Users, Send, ClipboardList, Clock, TrendingUp } from "lucide-react";
 
-export const metadata = { title: "Admin Overview — HackASU" };
+export const metadata = { title: "Admin Overview - HackASU" };
 
 export default async function AdminPage() {
   await requireAdmin();

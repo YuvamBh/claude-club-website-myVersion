@@ -22,7 +22,7 @@ export default function CalendarGrid({
   if (isLoading) {
     return (
       <div>
-        {/* Day headers — real labels, slightly faded */}
+        {/* Day headers - real labels, slightly faded */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {SHORT_DAY_NAMES.map((d) => (
             <div key={d} className="h-7 flex items-center justify-center">
@@ -36,7 +36,7 @@ export default function CalendarGrid({
           ))}
         </div>
 
-        {/* Grid skeleton — 6 rows × 7 cols with shimmer */}
+        {/* Grid skeleton - 6 rows × 7 cols with shimmer */}
         <style>{`
           @keyframes cal-shimmer {
             0%   { background-position: -400px 0; }

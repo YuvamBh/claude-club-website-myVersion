@@ -1,4 +1,4 @@
-// Better Auth handler removed — OAuth is now handled by Supabase.
+// Better Auth handler removed - OAuth is now handled by Supabase.
 // The active callback route is at /api/auth/callback.
 import { NextResponse } from "next/server";
 export function GET() {

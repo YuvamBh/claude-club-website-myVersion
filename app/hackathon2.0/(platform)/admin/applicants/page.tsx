@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getActiveHackathon, getAllApplications } from "@/lib/hackathon2.0/queries";
 import { Search, ExternalLink, FileText } from "lucide-react";
 
-export const metadata = { title: "Applicants — HackASU Admin" };
+export const metadata = { title: "Applicants - HackASU Admin" };
 
 export default async function AdminApplicantsPage({
   searchParams,
@@ -122,7 +122,7 @@ export default async function AdminApplicantsPage({
                       <p className="text-xs text-white/30">{app.user.email}</p>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-white/60">{app.university ?? "—"}</p>
+                      <p className="text-white/60">{app.university ?? "-"}</p>
                       <p className="text-xs text-white/30">{app.major ?? ""} · {app.year ?? ""}</p>
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">

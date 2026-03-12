@@ -99,7 +99,7 @@ export default function ApplyPage() {
     },
   });
 
-  // Phone auto-formatter — produces (XXX) XXX-XXXX
+  // Phone auto-formatter - produces (XXX) XXX-XXXX
   const phoneField = {
     name: "phone" as const,
     value: formData.phone,
@@ -139,15 +139,15 @@ export default function ApplyPage() {
     }
 
     if (s === 2) {
-      // LinkedIn — required, must be a valid URL
+      // LinkedIn - required, must be a valid URL
       if (!formData.linkedin.trim())                     e.linkedin = "LinkedIn URL is required";
       else if (!urlRx.test(formData.linkedin.trim()))    e.linkedin = "Enter a valid URL (include https://)";
 
-      // GitHub — optional, but if provided must be valid URL  
+      // GitHub - optional, but if provided must be valid URL  
       if (formData.github.trim() && !urlRx.test(formData.github.trim()))
         e.github = "Enter a valid URL (include https://)";
 
-      // Website — optional, but if provided must be valid URL
+      // Website - optional, but if provided must be valid URL
       if (formData.website.trim() && !urlRx.test(formData.website.trim()))
         e.website = "Enter a valid URL (include https://)";
     }

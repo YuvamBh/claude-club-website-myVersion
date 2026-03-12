@@ -1,5 +1,5 @@
 /**
- * Supabase admin client — uses the service role key.
+ * Supabase admin client - uses the service role key.
  * Use ONLY in server-side code (server actions, API routes, server components).
  * Never expose to the client bundle.
  */

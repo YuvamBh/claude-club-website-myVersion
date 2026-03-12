@@ -197,7 +197,7 @@ export function HackASUPongHero() {
       ball.x += ball.dx;
       ball.y += ball.dy;
 
-      // Left / right walls — simple bounce, no paddle needed
+      // Left / right walls - simple bounce, no paddle needed
       if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.dx = Math.abs(ball.dx); }
       if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.dx = -Math.abs(ball.dx); }
       // Top / bottom walls (fallback if paddle missed)
@@ -235,7 +235,7 @@ export function HackASUPongHero() {
     };
 
     const draw = () => {
-      // Dark gradient background — deep warm black with subtle orange at centre
+      // Dark gradient background - deep warm black with subtle orange at centre
       const grad = ctx.createRadialGradient(
         canvas.width / 2, canvas.height / 2, canvas.height * 0.05,
         canvas.width / 2, canvas.height / 2, canvas.height * 0.85
@@ -302,7 +302,7 @@ export function HackASUPongHero() {
     <canvas
       ref={canvasRef}
       className="block w-full h-full"
-      aria-label="HackASU by CBC — animated pong hero"
+      aria-label="HackASU by CBC - animated pong hero"
     />
   );
 }

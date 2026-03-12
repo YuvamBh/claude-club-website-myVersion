@@ -38,6 +38,7 @@ NEXT_PUBLIC_GOOGLE_CALENDAR_ID=your_calendar_id@group.calendar.google.com
 ### 4. Make Calendar Public (Optional)
 
 If you want to share the calendar publicly:
+
 1. In calendar settings, scroll to "Access permissions"
 2. Check "Make available to public"
 3. Set permission to "See all event details"
@@ -61,7 +62,7 @@ The industry partnership and contact forms rely on SMTP to deliver submissions. 
 
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
 - `RECIPIENT_EMAIL` (defaults to `SMTP_USER` if omitted)
-- `CONTACT_DISCORD_WEBHOOK_URL` *(optional)* — post each submission to a Discord channel so teammates without inbox access can stay informed.
+- `CONTACT_DISCORD_WEBHOOK_URL` _(optional)_ - post each submission to a Discord channel so teammates without inbox access can stay informed.
 
 With the webhook configured, every form entry is delivered both via email and Discord.
 
@@ -76,6 +77,7 @@ http://localhost:3000/devs
 ```
 
 This page provides a live showcase of the entire UI component library, including:
+
 - Buttons (all variants and sizes)
 - Typography (Headings, Text, Labels)
 - Form inputs (Input, Textarea)

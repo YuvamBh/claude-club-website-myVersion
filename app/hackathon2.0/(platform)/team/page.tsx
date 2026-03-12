@@ -130,7 +130,7 @@ export default function TeamPage() {
       )}
 
       {!team ? (
-        // No team — show create/join options
+        // No team - show create/join options
         <div className="space-y-4">
           {mode === "idle" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,7 +225,7 @@ export default function TeamPage() {
           )}
         </div>
       ) : (
-        // Has team — show team details
+        // Has team - show team details
         <div className="space-y-5">
           {/* Team card */}
           <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-6">

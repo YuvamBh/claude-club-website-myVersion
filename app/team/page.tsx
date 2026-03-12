@@ -146,7 +146,7 @@ export default function TeamPage() {
                 </span>
               </div>
 
-              {/* Cards grid — leadership uses larger 3-col, rest 4-col */}
+              {/* Cards grid - leadership uses larger 3-col, rest 4-col */}
               <motion.div
                 variants={stagger}
                 className={`grid gap-x-5 gap-y-12 ${

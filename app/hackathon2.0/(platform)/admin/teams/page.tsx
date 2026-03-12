@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getActiveHackathon, getAllTeams } from "@/lib/hackathon2.0/queries";
 import { Crown, Send, FileText } from "lucide-react";
 
-export const metadata = { title: "Teams — HackASU Admin" };
+export const metadata = { title: "Teams - HackASU Admin" };
 
 export default async function AdminTeamsPage() {
   await requireAdmin();
@@ -70,7 +70,7 @@ export default async function AdminTeamsPage() {
                           {team.track.name}
                         </span>
                       ) : (
-                        <span className="text-xs text-white/20">—</span>
+                        <span className="text-xs text-white/20">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

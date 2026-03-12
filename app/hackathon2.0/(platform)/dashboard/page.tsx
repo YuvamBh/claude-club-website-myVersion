@@ -19,7 +19,7 @@ import {
   Info,
 } from "lucide-react";
 
-export const metadata = { title: "Dashboard — HackASU" };
+export const metadata = { title: "Dashboard - HackASU" };
 
 export default async function DashboardPage() {
   const user = await requireAuth();

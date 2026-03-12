@@ -334,7 +334,7 @@ export default function SubmitPage() {
               <div className="flex gap-2 mb-2">
                 <input
                   className={inputCls()}
-                  placeholder="React, Next.js, Python, etc. — press Enter"
+                  placeholder="React, Next.js, Python, etc. - press Enter"
                   value={form.techStackInput}
                   onChange={(e) => set("techStackInput", e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTechTag())}
@@ -580,7 +580,7 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2 border-b border-white/5">
       <span className="text-xs text-white/40 shrink-0 w-28">{label}</span>
-      <span className="text-xs text-white/70 text-right break-all">{value || "—"}</span>
+      <span className="text-xs text-white/70 text-right break-all">{value || "-"}</span>
     </div>
   );
 }

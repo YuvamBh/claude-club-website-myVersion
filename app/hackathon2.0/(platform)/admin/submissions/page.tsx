@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getActiveHackathon, getAllSubmissions } from "@/lib/hackathon2.0/queries";
 import { ExternalLink, Github, Video, Globe } from "lucide-react";
 
-export const metadata = { title: "Submissions — HackASU Admin" };
+export const metadata = { title: "Submissions - HackASU Admin" };
 
 export default async function AdminSubmissionsPage({
   searchParams,
@@ -126,7 +126,7 @@ export default async function AdminSubmissionsPage({
                         {sub.team.track.name}
                       </span>
                     ) : (
-                      <span className="text-xs text-white/20">—</span>
+                      <span className="text-xs text-white/20">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">

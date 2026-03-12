@@ -162,7 +162,7 @@ export default function Home() {
                 {
                   num: "03",
                   title: "Everyone ships.",
-                  body: "No passive observers. Every member leaves each session having pushed something real — an app, an agent, a feature.",
+                  body: "No passive observers. Every member leaves each session having pushed something real - an app, an agent, a feature.",
                 },
               ].map((p, i) => (
                 <motion.div
@@ -240,7 +240,7 @@ export default function Home() {
               {
                 emoji: "🧠",
                 title: "Learn by doing",
-                body: "No slides, no theory. Every session ends with something shipped — an app, an agent, or a working prototype using Claude.",
+                body: "No slides, no theory. Every session ends with something shipped - an app, an agent, or a working prototype using Claude.",
               },
               {
                 emoji: "🤝",
@@ -250,7 +250,7 @@ export default function Home() {
               {
                 emoji: "🚀",
                 title: "Access Anthropic resources",
-                body: "Free API credits, Claude Pro access, and direct lines to Anthropic's team — perks that only exist because you showed up.",
+                body: "Free API credits, Claude Pro access, and direct lines to Anthropic's team - perks that only exist because you showed up.",
               },
             ].map((item, i) => (
               <motion.div
@@ -278,7 +278,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/*Stats section — premium cards*/}
+        {/*Stats section - premium cards*/}
         <section className="relative px-4 sm:px-8 md:px-16 pb-20 w-full">
           <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithGoogle } from "@/lib/auth-client";
-import { Trophy } from "lucide-react";
+import { Trophy, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function HackathonSignInPage() {
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const errorParam = searchParams.get("error");
 
   async function handleSignIn() {
     setLoading(true);
@@ -25,10 +28,19 @@ export default function HackathonSignInPage() {
         {/* Card */}
         <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-8 text-center">
           <h1 className="text-xl font-bold text-white mb-2">Sign in to continue</h1>
-          <p className="text-sm text-white/40 mb-8">
+          <p className="text-sm text-white/40 mb-6">
             Use your <span className="text-white/60">@asu.edu</span> Google account to access the
             hackathon platform.
           </p>
+
+          {errorParam === "domain" && (
+            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start text-left gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-200">
+                Access restricted. You must use an <strong>@asu.edu</strong> email address to participate in this hackathon.
+              </p>
+            </div>
+          )}
 
           <button
             onClick={handleSignIn}
@@ -60,6 +72,33 @@ export default function HackathonSignInPage() {
           <p className="text-xs text-white/20 mt-4">
             Only @asu.edu accounts are permitted.
           </p>
+        </div>
+
+        {/* Not a participant section */}
+        <div className="mt-8 rounded-2xl border border-white/5 bg-[#1a1a1a]/50 p-6">
+          <h2 className="text-sm font-medium text-white/80 mb-4 text-center">
+            Not an ASU student?
+          </h2>
+          <div className="space-y-3">
+             <a href="#" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/20 flex items-center justify-center text-[#ff9b7a]">
+                    <Trophy size={14} />
+                  </div>
+                  <span className="text-sm text-white/90 font-medium tracking-wide">Become a Sponsor</span>
+                </div>
+                <ChevronRight size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
+             </a>
+             <a href="#" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/20 flex items-center justify-center text-[#ff9b7a]">
+                    <ExternalLink size={14} />
+                  </div>
+                  <span className="text-sm text-white/90 font-medium tracking-wide">Join as a Mentor/Judge</span>
+                </div>
+                <ChevronRight size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
+             </a>
+          </div>
         </div>
 
         <p className="text-center mt-6">

@@ -17,7 +17,7 @@ interface EventData {
 
 const EVENTS: EventData[] = [
   {
-    title: "Spring Hackathon — Build with Claude",
+    title: "Spring Hackathon - Build with Claude",
     date: "March 2025",
     semester: "Spring 2025",
     description: "60+ students prototyped AI apps with the Claude API across productivity, creative, and social-impact tracks.",
@@ -267,7 +267,7 @@ export default function PastEventsPage() {
                 pointerEvents: "none",
               }}
             >
-              {/*Card panel—bottom of screen, spanning most of the width*/}
+              {/*Card panel-bottom of screen, spanning most of the width*/}
               <div style={{
                 width: "100%",
                 padding: "0 clamp(1.5rem, 5vw, 4rem) clamp(2rem, 5vh, 3.5rem)",

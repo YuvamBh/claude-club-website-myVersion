@@ -119,7 +119,7 @@ function ImagePlane({ src, aspectRatio, revealRadius, revealSoftness, pixelSize,
 
   const scale = useMemo<[number, number, number]>(() => {
     // Cover logic: always scale so the image fills the full viewport (no letterboxing/side bars).
-    // Like CSS object-fit: cover — whichever dimension is "short", stretch to fill it.
+    // Like CSS object-fit: cover - whichever dimension is "short", stretch to fill it.
     const viewportAspect = viewport.width / viewport.height;
     if (viewportAspect > aspectRatio) {
       // Screen is wider than image → fit to WIDTH (image height gets cropped)

@@ -245,7 +245,7 @@ function InfoItem({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <p className="text-xs text-white/30 mb-0.5">{label}</p>
-      <p className="text-sm text-white/70">{value ?? "—"}</p>
+      <p className="text-sm text-white/70">{value ?? "-"}</p>
     </div>
   );
 }

@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { saveApplication } from "@/lib/hackathon2.0/actions";
-import { CheckCircle2, Save, Send, ChevronRight, ChevronLeft, Upload } from "lucide-react";
+import { saveApplication, getMyApplication } from "@/lib/hackathon2.0/actions";
+import { CheckCircle2, Save, Send, ChevronRight, ChevronLeft, Upload, Loader2 } from "lucide-react";
 
 const YEARS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 const EXPERIENCE_LEVELS = [
-  { value: "beginner", label: "Beginner — First hackathon or new to coding" },
-  { value: "intermediate", label: "Intermediate — Some projects under my belt" },
-  { value: "advanced", label: "Advanced — Shipped products or multiple hackathons" },
+  { value: "beginner", label: "Beginner - First hackathon or new to coding" },
+  { value: "intermediate", label: "Intermediate - Some projects under my belt" },
+  { value: "advanced", label: "Advanced - Shipped products or multiple hackathons" },
 ];
 
 // Replace with your real hackathon ID from DB / env
@@ -32,7 +32,7 @@ interface FormState {
 }
 
 const defaultState: FormState = {
-  university: "",
+  university: "Arizona State University",
   major: "",
   year: "",
   experienceLevel: "",
@@ -63,7 +63,24 @@ export default function ApplyPage() {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isLoadingDraft, setIsLoadingDraft] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    async function fetchDraft() {
+      try {
+        const result = await getMyApplication(HACKATHON_ID);
+        if (result.success && result.data) {
+          setForm({ ...defaultState, ...(result.data as any) });
+        }
+      } catch (err) {
+        console.error("Failed to load draft application:", err);
+      } finally {
+        setIsLoadingDraft(false);
+      }
+    }
+    fetchDraft();
+  }, []);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -105,6 +122,8 @@ export default function ApplyPage() {
       if (result.success) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+      } else {
+        alert("Failed to save draft: " + result.error);
       }
     });
   }
@@ -129,6 +148,15 @@ export default function ApplyPage() {
         <CheckCircle2 size={48} className="text-green-400 mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Application Submitted!</h2>
         <p className="text-white/40 text-sm">Redirecting to dashboard…</p>
+      </div>
+    );
+  }
+
+  if (isLoadingDraft) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center text-white/50">
+        <Loader2 className="w-8 h-8 animate-spin mb-4 mx-auto" />
+        <p>Loading application...</p>
       </div>
     );
   }
@@ -183,12 +211,11 @@ export default function ApplyPage() {
         {step === 1 && (
           <div className="space-y-5">
             <h2 className="text-base font-semibold text-white mb-4">Personal Information</h2>
-            <Field label="University / School" error={errors.university} required>
+            <Field label="University / School" required>
               <input
-                className={inputCls(!!errors.university)}
-                placeholder="Arizona State University"
-                value={form.university}
-                onChange={(e) => set("university", e.target.value)}
+                className={`${inputCls(false)} opacity-60 cursor-not-allowed`}
+                value="Arizona State University"
+                readOnly
               />
             </Field>
             <div className="grid grid-cols-2 gap-4">
@@ -454,7 +481,7 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2 border-b border-white/5">
       <span className="text-xs text-white/40 shrink-0">{label}</span>
-      <span className="text-xs text-white/70 text-right">{value || "—"}</span>
+      <span className="text-xs text-white/70 text-right">{value || "-"}</span>
     </div>
   );
 }

@@ -24,19 +24,19 @@ type ActionResult<T = unknown> =
 
 const ApplicationSchema = z.object({
   hackathonId: z.string(),
-  university: z.string().min(2),
-  major: z.string().min(2),
+  university: z.string(),
+  major: z.string(),
   year: z.string(),
   experienceLevel: z.string(),
-  desiredTracks: z.array(z.string()).min(1),
+  desiredTracks: z.array(z.string()),
   priorExperience: z.string().optional(),
-  whyJoin: z.string().min(20),
+  whyJoin: z.string(),
   linkedinUrl: z.string().url().optional().or(z.literal("")),
   githubUrl: z.string().url().optional().or(z.literal("")),
   resumeUrl: z.string().url().optional().or(z.literal("")),
   dietaryNeeds: z.string().optional(),
   accessibilityNeeds: z.string().optional(),
-  agreedToRules: z.boolean().refine((v) => v, "You must agree to the rules"),
+  agreedToRules: z.boolean(),
   submit: z.boolean().default(false),
 });
 
@@ -86,6 +86,40 @@ export async function saveApplication(
   revalidatePath("/hackathon2.0/dashboard");
   revalidatePath("/hackathon2.0/apply");
   return { success: true, data };
+}
+
+export async function getMyApplication(hackathonId: string): Promise<ActionResult> {
+  const user = await requireAuth();
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_applications")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("hackathon_id", hackathonId)
+    .maybeSingle();
+
+  if (error) return { success: false, error: error.message };
+  
+  // Convert snake_case to camelCase nicely for the frontend state
+  if (data) {
+    const camelData = {
+      university: data.university ?? "",
+      major: data.major ?? "",
+      year: data.year ?? "",
+      experienceLevel: data.experience_level ?? "",
+      desiredTracks: data.desired_tracks ?? [],
+      priorExperience: data.prior_experience ?? "",
+      whyJoin: data.why_join ?? "",
+      linkedinUrl: data.linkedin_url ?? "",
+      githubUrl: data.github_url ?? "",
+      resumeUrl: data.resume_url ?? "",
+      dietaryNeeds: data.dietary_needs ?? "",
+      accessibilityNeeds: data.accessibility_needs ?? "",
+      agreedToRules: data.agreed_to_rules ?? false,
+    };
+    return { success: true, data: camelData };
+  }
+  return { success: true, data: null };
 }
 
 // ─── Team ─────────────────────────────────────────────────────────────────────
@@ -263,7 +297,7 @@ export async function transferCaptain(
 const SubmissionSchema = z.object({
   teamId: z.string(),
   hackathonId: z.string(),
-  projectName: z.string().min(2).max(100),
+  projectName: z.string().max(100),
   tagline: z.string().max(200).optional(),
   trackId: z.string().optional(),
   shortDescription: z.string().max(500).optional(),

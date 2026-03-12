@@ -59,7 +59,7 @@ export default function HackathonPromo({
 
             <Link href="/hackathon2.0" className="w-full inline-block" data-umami-event="Hackathon Register" data-umami-event-location="HackathonPromo">
               <Button variant="primary" size="md" fullWidth>
-                Register Now — Limited Spots
+                Register Now - Limited Spots
               </Button>
             </Link>
 

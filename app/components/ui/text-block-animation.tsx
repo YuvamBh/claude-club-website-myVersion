@@ -28,7 +28,7 @@ export default function TextBlockAnimation({
     const containerRef = useRef<HTMLDivElement>(null);
     const [isSplit, setIsSplit] = useState(false);
 
-    // 1. Initial splitting — do this once on mount
+    // 1. Initial splitting - do this once on mount
     useEffect(() => {
         if (!containerRef.current || isSplit) return;
 

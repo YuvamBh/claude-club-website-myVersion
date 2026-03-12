@@ -34,12 +34,12 @@ export async function GET(request: NextRequest) {
       if (!email.endsWith("@asu.edu")) {
         await supabase.auth.signOut();
         return NextResponse.redirect(
-          `${origin}/hackathon/signin?error=domain`
+          `${origin}/hackathon2.0/signin?error=domain`
         );
       }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/hackathon/signin?error=auth`);
+  return NextResponse.redirect(`${origin}/hackathon2.0/signin?error=auth`);
 }
