@@ -56,10 +56,10 @@ export default async function DashboardPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-xl sm:text-2xl font-bold text-white">
           Welcome back, {user.name.split(" ")[0]} 
         </h1>
-        <p className="text-sm text-white/40 mt-1">{hackathon.name}</p>
+        <p className="text-xs sm:text-sm text-white/40 mt-1">{hackathon.name}</p>
       </div>
 
       {/* Announcements */}
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Status cards row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <StatusCard
           icon={ClipboardList}
           title="Application"
