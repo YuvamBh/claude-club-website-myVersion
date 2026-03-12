@@ -1,3 +1,4 @@
+import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
@@ -101,31 +102,39 @@ export default async function ApplicantDetailPage({
             <p className="text-xs text-white/40 uppercase tracking-wide font-medium mb-3">
               Update Status
             </p>
-            <form action={handleStatus} className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                {(["ACCEPTED", "REJECTED", "WAITLISTED", "UNDER_REVIEW"] as const).map((s) => (
-                  <button
-                    key={s}
-                    name="status"
-                    value={s}
-                    type="submit"
-                    className={`text-xs py-2 px-3 rounded-lg border transition-colors ${
-                      application.status === s
-                        ? statusButtonActive(s)
-                        : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
-                    }`}
-                  >
-                    {s === "UNDER_REVIEW" ? "Review" : s.charAt(0) + s.slice(1).toLowerCase()}
-                  </button>
-                ))}
+            {application.status === "DRAFT" ? (
+              <div className="p-3 rounded-lg bg-[#ff9b7a]/5 border border-[#ff9b7a]/20">
+                <p className="text-xs text-[#ff9b7a]">
+                  This application is still a draft. Status updates are only available after the applicant submits.
+                </p>
               </div>
-              <textarea
-                name="notes"
-                defaultValue={application.adminNotes ?? ""}
-                placeholder="Internal notes (optional)..."
-                className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/60 placeholder-white/20 outline-none min-h-[80px] resize-y"
-              />
-            </form>
+            ) : (
+              <form action={handleStatus} className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {(["ACCEPTED", "REJECTED", "WAITLISTED", "UNDER_REVIEW"] as const).map((s) => (
+                    <button
+                      key={s}
+                      name="status"
+                      value={s}
+                      type="submit"
+                      className={`text-xs py-2 px-3 rounded-lg border transition-colors ${
+                        application.status === s
+                          ? statusButtonActive(s)
+                          : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
+                      }`}
+                    >
+                      {s === "UNDER_REVIEW" ? "Review" : s.charAt(0) + s.slice(1).toLowerCase()}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  name="notes"
+                  defaultValue={application.adminNotes ?? ""}
+                  placeholder="Internal notes (optional)..."
+                  className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/60 placeholder-white/20 outline-none min-h-[80px] resize-y"
+                />
+              </form>
+            )}
             {application.reviewedAt && (
               <p className="text-xs text-white/20 mt-2">
                 Reviewed {application.reviewedAt.toLocaleDateString()}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { saveApplication, getMyApplication, uploadResume } from "@/lib/hackathon2.0/actions";
 import { CheckCircle2, Save, Send, ChevronRight, ChevronLeft, Upload, Loader2, X, FileText } from "lucide-react";
 
@@ -27,6 +28,7 @@ interface FormState {
   resumeUrl: string;
   dietaryNeeds: string;
   agreedToRules: boolean;
+  status?: string;
 }
 
 const defaultState: FormState = {
@@ -52,6 +54,53 @@ const STEPS = [
 ];
 
 const TRACKS = ["AI / ML", "Web & Mobile", "Fintech", "Healthcare", "Social Good", "Open Track"];
+
+function inputCls(hasError: boolean) {
+  return `w-full bg-[#111] border ${
+    hasError ? "border-[#ff9b7a]/50" : "border-white/10 focus:border-[#ff9b7a]/50"
+  } rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
+}
+
+function Field({
+  label,
+  error,
+  required,
+  children,
+}: {
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-white/50 mb-1.5">
+        {label}
+        {required && <span className="text-[#ff9b7a] ml-0.5">*</span>}
+      </label>
+      {children}
+      {error && <p className="text-xs text-[#ff9b7a] mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2 border-b border-white/5">
+      <span className="text-xs text-white/40 shrink-0">{label}</span>
+      <span className="text-xs text-white/70 text-right">{value || "-"}</span>
+    </div>
+  );
+}
+
+function SectionView({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-xs font-semibold text-[#ff9b7a] uppercase tracking-wider">{title}</h3>
+      <div className="space-y-1">{children}</div>
+    </div>
+  );
+}
 
 export default function ApplyPage() {
   const [step, setStep] = useState(1);
@@ -80,12 +129,15 @@ export default function ApplyPage() {
     fetchDraft();
   }, []);
 
+  const isSubmitted = form.status && form.status !== "DRAFT" && form.status !== "REJECTED";
+
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
   function toggleTrack(track: string) {
+    if (isSubmitted) return;
     set(
       "desiredTracks",
       form.desiredTracks.includes(track)
@@ -147,6 +199,7 @@ export default function ApplyPage() {
   }
 
   async function handleResumeUpload(file: File) {
+    if (isSubmitted) return;
     if (file.size > 10 * 1024 * 1024) {
       setErrors((prev) => ({ ...prev, resumeUrl: "File too large (max 10MB)" }));
       return;
@@ -203,6 +256,59 @@ export default function ApplyPage() {
       <div className="flex flex-col items-center justify-center py-24 text-center text-white/50">
         <Loader2 className="w-8 h-8 animate-spin mb-4 mx-auto" />
         <p>Loading application...</p>
+      </div>
+    );
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Your Application</h1>
+            <p className="text-sm text-white/40 mt-1">
+              Status: <span className="text-green-400 font-medium">{form.status}</span>
+            </p>
+          </div>
+          <button
+            onClick={() => alert("Implementation coming soon!")}
+            className="px-4 py-2 text-sm font-medium bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg transition-colors"
+          >
+            Update application
+          </button>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-6 space-y-6">
+          <SectionView title="Personal Information">
+            <ReviewRow label="University" value={form.university} />
+            <ReviewRow label="Major" value={form.major} />
+            <ReviewRow label="Year" value={form.year} />
+          </SectionView>
+
+          <SectionView title="Experience">
+            <ReviewRow label="Level" value={form.experienceLevel} />
+            <ReviewRow label="Tracks" value={form.desiredTracks.join(", ")} />
+            <div className="py-2">
+              <span className="text-xs text-white/40 block mb-1">Why join:</span>
+              <p className="text-sm text-white/70 bg-white/5 p-3 rounded-lg border border-white/5 whitespace-pre-wrap">{form.whyJoin}</p>
+            </div>
+          </SectionView>
+
+          <SectionView title="Links & Assets">
+            <ReviewRow label="GitHub" value={form.githubUrl} />
+            <ReviewRow label="LinkedIn" value={form.linkedinUrl || "Not provided"} />
+            <ReviewRow label="Resume" value="Uploaded ✓" />
+          </SectionView>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-white/10 text-center">
+          <Link
+            href="/hackathon2.0/dashboard"
+            className="text-sm text-[#ff9b7a] hover:text-[#ffb89e] flex items-center justify-center gap-1.5 mx-auto"
+          >
+            <ChevronLeft size={14} /> Back to Dashboard
+          </Link>
+        </div>
       </div>
     );
   }
@@ -538,42 +644,3 @@ export default function ApplyPage() {
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function inputCls(hasError: boolean) {
-  return `w-full bg-[#111] border ${
-    hasError ? "border-[#ff9b7a]/50" : "border-white/10 focus:border-[#ff9b7a]/50"
-  } rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
-}
-
-function Field({
-  label,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-white/50 mb-1.5">
-        {label}
-        {required && <span className="text-[#ff9b7a] ml-0.5">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-[#ff9b7a] mt-1">{error}</p>}
-    </div>
-  );
-}
-
-function ReviewRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-2 border-b border-white/5">
-      <span className="text-xs text-white/40 shrink-0">{label}</span>
-      <span className="text-xs text-white/70 text-right">{value || "-"}</span>
-    </div>
-  );
-}
