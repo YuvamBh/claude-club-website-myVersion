@@ -16,11 +16,11 @@ export async function GET() {
   const team = await getUserTeam(user.id, hackathon.id);
   if (!team) return NextResponse.json({ team: null, submission: null, isCaptain: false });
 
-  const submission = (team as { hackathon_submissions?: unknown }).hackathon_submissions ?? null;
-  const members = (team as { hackathon_team_members?: { user_id: string; role: string }[] }).hackathon_team_members ?? [];
+  const submission = team.submission ?? null;
+  const members = team.members ?? [];
   
   const isCaptain = members.some(
-    (m) => m.user_id === user.id && m.role === "CAPTAIN"
+    (m: any) => m.userId === user.id && m.role === "CAPTAIN"
   );
 
   // Fetch tracks for the submission form

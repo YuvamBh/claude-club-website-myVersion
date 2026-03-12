@@ -42,7 +42,6 @@ interface SubmitForm {
   videoUrl: string;
   presentationUrl: string;
   deploymentUrl: string;
-  designUrl: string;
   additionalNotes: string;
   agreedToRules: boolean;
 }
@@ -73,10 +72,11 @@ export default function SubmitPage() {
     videoUrl: "",
     presentationUrl: "",
     deploymentUrl: "",
-    designUrl: "",
     additionalNotes: "",
     agreedToRules: false,
   });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/api/hackathon2.0/submission/me")
@@ -103,7 +103,6 @@ export default function SubmitPage() {
               videoUrl: s.videoUrl ?? "",
               presentationUrl: s.presentationUrl ?? "",
               deploymentUrl: s.deploymentUrl ?? "",
-              designUrl: s.designUrl ?? "",
               additionalNotes: s.additionalNotes ?? "",
               agreedToRules: s.agreedToRules ?? false,
             }));
@@ -116,6 +115,46 @@ export default function SubmitPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  function validateStep(s: number) {
+    const errs: Record<string, string> = {};
+    if (s === 1) {
+      if (!form.projectName.trim()) errs.projectName = "Project name is required";
+      if (form.shortDescription.trim().length > 500) errs.shortDescription = "Too long";
+    }
+    if (s === 2) {
+      if (!form.githubUrl.trim()) errs.githubUrl = "GitHub URL is required";
+      // Basic URL check
+      try {
+        if (form.githubUrl.trim()) new URL(form.githubUrl);
+      } catch {
+        errs.githubUrl = "Invalid URL";
+      }
+    }
+    // Step 3 (Details) is mostly optional but we can add checks if needed
+    
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  function handleNext() {
+    if (validateStep(step)) {
+      setStep(step + 1);
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function handleJumpToStep(target: number) {
+    if (target < step) {
+      setStep(target);
+      return;
+    }
+    // Validate all steps between current and target
+    for (let i = step; i < target; i++) {
+      if (!validateStep(i)) return;
+    }
+    setStep(target);
+  }
 
   function set<K extends keyof SubmitForm>(key: K, value: SubmitForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -150,7 +189,6 @@ export default function SubmitPage() {
       videoUrl: form.videoUrl || undefined,
       presentationUrl: form.presentationUrl || undefined,
       deploymentUrl: form.deploymentUrl || undefined,
-      designUrl: form.designUrl || undefined,
       additionalNotes: form.additionalNotes,
       agreedToRules: form.agreedToRules,
       submit,
@@ -207,16 +245,8 @@ export default function SubmitPage() {
     );
   }
 
-  if (!isCaptain) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="text-white/60 font-medium text-base mb-1">Captain only</p>
-        <p className="text-white/30 text-sm">
-          Only the team captain can manage the submission.
-        </p>
-      </div>
-    );
-  }
+  // Read-only logic: captains have full control, others just see.
+  const isReadOnly = !isCaptain;
 
   if (submitted) {
     return (
@@ -242,7 +272,14 @@ export default function SubmitPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Project Submission</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-white">Project Submission</h1>
+              {isReadOnly && (
+                <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  Read Only
+                </span>
+              )}
+            </div>
             <p className="text-sm text-white/40 mt-1">Team: {team.name}</p>
           </div>
           {savedAt && (
@@ -259,12 +296,24 @@ export default function SubmitPage() {
         </div>
       )}
 
+      {isReadOnly && (
+        <div className="mb-6 px-4 py-3 bg-[#ff9b7a]/5 border border-[#ff9b7a]/10 rounded-lg flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/10 flex items-center justify-center shrink-0">
+            <Presentation size={14} className="text-[#ff9b7a]" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[#ff9b7a]">Viewing as Team Member</p>
+            <p className="text-xs text-white/40">Only the team captain can edit and submit the project.</p>
+          </div>
+        </div>
+      )}
+
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-8">
         {STEPS.map((s, i) => (
           <div key={s.number} className="flex items-center gap-2">
             <button
-              onClick={() => step > s.number && setStep(s.number)}
+              onClick={() => handleJumpToStep(s.number)}
               className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
                 step === s.number ? "text-[#ff9b7a]" : step > s.number ? "text-white/60 cursor-pointer" : "text-white/20"
               }`}
@@ -288,12 +337,13 @@ export default function SubmitPage() {
         {step === 1 && (
           <div className="space-y-5">
             <h2 className="text-base font-semibold text-white mb-4">Project Information</h2>
-            <Field label="Project Name" required>
+            <Field label="Project Name" error={errors.projectName} required>
               <input
-                className={inputCls()}
+                className={inputCls(!!errors.projectName)}
                 placeholder="My Awesome Project"
                 value={form.projectName}
                 onChange={(e) => set("projectName", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
             <Field label="Tagline">
@@ -302,6 +352,7 @@ export default function SubmitPage() {
                 placeholder="One sentence that captures your project"
                 value={form.tagline}
                 onChange={(e) => set("tagline", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
             {team.tracks && team.tracks.length > 0 && (
@@ -310,6 +361,7 @@ export default function SubmitPage() {
                   className={inputCls()}
                   value={form.trackId}
                   onChange={(e) => set("trackId", e.target.value)}
+                  disabled={isReadOnly}
                 >
                   <option value="">Select a track</option>
                   {team.tracks.map((t) => (
@@ -318,13 +370,14 @@ export default function SubmitPage() {
                 </select>
               </Field>
             )}
-            <Field label="Short Description (max 500 chars)">
+            <Field label="Short Description (max 500 chars)" error={errors.shortDescription}>
               <textarea
-                className={`${inputCls()} min-h-[80px] resize-y`}
+                className={`${inputCls(!!errors.shortDescription)} min-h-[80px] resize-y`}
                 placeholder="Brief overview of what your project does..."
                 value={form.shortDescription}
                 maxLength={500}
                 onChange={(e) => set("shortDescription", e.target.value)}
+                readOnly={isReadOnly}
               />
               <p className="text-xs text-white/30 mt-1 text-right">
                 {form.shortDescription.length}/500
@@ -338,14 +391,17 @@ export default function SubmitPage() {
                   value={form.techStackInput}
                   onChange={(e) => set("techStackInput", e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTechTag())}
+                  readOnly={isReadOnly}
                 />
-                <button
-                  type="button"
-                  onClick={addTechTag}
-                  className="shrink-0 px-3 py-2 bg-[#ff9b7a]/10 hover:bg-[#ff9b7a]/20 text-[#ff9b7a] rounded-lg transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={addTechTag}
+                    className="shrink-0 px-3 py-2 bg-[#ff9b7a]/10 hover:bg-[#ff9b7a]/20 text-[#ff9b7a] rounded-lg transition-colors"
+                  >
+                    <Plus size={14} />
+                  </button>
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {form.techStack.map((tag) => (
@@ -354,9 +410,11 @@ export default function SubmitPage() {
                     className="flex items-center gap-1 text-xs bg-white/8 text-white/60 px-2.5 py-1 rounded-full"
                   >
                     {tag}
-                    <button onClick={() => removeTechTag(tag)} className="text-white/30 hover:text-white/60">
-                      <X size={10} />
-                    </button>
+                    {!isReadOnly && (
+                      <button onClick={() => removeTechTag(tag)} className="text-white/30 hover:text-white/60">
+                        <X size={10} />
+                      </button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -373,8 +431,10 @@ export default function SubmitPage() {
               icon={Github}
               placeholder="https://github.com/team/project"
               value={form.githubUrl}
+              error={errors.githubUrl}
               onChange={(v) => set("githubUrl", v)}
               required
+              readOnly={isReadOnly}
             />
             <LinkField
               label="Demo / Live Site"
@@ -382,6 +442,7 @@ export default function SubmitPage() {
               placeholder="https://myproject.vercel.app"
               value={form.deploymentUrl}
               onChange={(v) => set("deploymentUrl", v)}
+              readOnly={isReadOnly}
             />
             <LinkField
               label="Demo Video"
@@ -389,6 +450,7 @@ export default function SubmitPage() {
               placeholder="https://youtube.com/watch?v=..."
               value={form.videoUrl}
               onChange={(v) => set("videoUrl", v)}
+              readOnly={isReadOnly}
             />
             <LinkField
               label="Presentation / Slides"
@@ -396,20 +458,7 @@ export default function SubmitPage() {
               placeholder="https://docs.google.com/presentation/..."
               value={form.presentationUrl}
               onChange={(v) => set("presentationUrl", v)}
-            />
-            <LinkField
-              label="Live Demo URL"
-              icon={Globe}
-              placeholder="https://demo.myproject.com"
-              value={form.demoUrl}
-              onChange={(v) => set("demoUrl", v)}
-            />
-            <LinkField
-              label="Design / Mockups"
-              icon={Presentation}
-              placeholder="https://figma.com/..."
-              value={form.designUrl}
-              onChange={(v) => set("designUrl", v)}
+              readOnly={isReadOnly}
             />
           </div>
         )}
@@ -424,6 +473,7 @@ export default function SubmitPage() {
                 placeholder="What problem does your project solve?"
                 value={form.problemStatement}
                 onChange={(e) => set("problemStatement", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
             <Field label="Solution Overview">
@@ -432,6 +482,7 @@ export default function SubmitPage() {
                 placeholder="How does your project solve it?"
                 value={form.solutionOverview}
                 onChange={(e) => set("solutionOverview", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
             <Field label="Long Description">
@@ -440,6 +491,7 @@ export default function SubmitPage() {
                 placeholder="Full description of your project, architecture, challenges faced..."
                 value={form.longDescription}
                 onChange={(e) => set("longDescription", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
             <Field label="Additional Notes">
@@ -448,6 +500,7 @@ export default function SubmitPage() {
                 placeholder="Anything else you'd like the judges to know?"
                 value={form.additionalNotes}
                 onChange={(e) => set("additionalNotes", e.target.value)}
+                readOnly={isReadOnly}
               />
             </Field>
           </div>
@@ -478,6 +531,7 @@ export default function SubmitPage() {
                   className="mt-0.5 accent-[#ff9b7a]"
                   checked={form.agreedToRules}
                   onChange={(e) => set("agreedToRules", e.target.checked)}
+                  disabled={isReadOnly}
                 />
                 <span className="text-sm text-white/60">
                   I confirm this project was built during the hackathon and I agree to the
@@ -500,22 +554,24 @@ export default function SubmitPage() {
               <ChevronLeft size={14} /> Back
             </button>
           )}
-          <button
-            onClick={handleSave}
-            disabled={isPending}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm text-white/40 border border-white/5 hover:border-white/10 rounded-lg transition-colors disabled:opacity-50"
-          >
-            <Save size={13} /> Save Draft
-          </button>
+          {!isReadOnly && (
+            <button
+              onClick={handleSave}
+              disabled={isPending}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm text-white/40 border border-white/5 hover:border-white/10 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <Save size={13} /> Save Draft
+            </button>
+          )}
         </div>
         {step < 4 ? (
           <button
-            onClick={() => setStep((s) => s + 1)}
+            onClick={handleNext}
             className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium bg-[#ff9b7a] hover:bg-[#ffb89e] text-black rounded-lg transition-colors"
           >
             Next <ChevronRight size={14} />
           </button>
-        ) : (
+        ) : !isReadOnly && (
           <button
             onClick={handleSubmit}
             disabled={isPending}
@@ -532,11 +588,11 @@ export default function SubmitPage() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function inputCls() {
-  return "w-full bg-[#111] border border-white/10 focus:border-[#ff9b7a]/50 rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors";
+function inputCls(error?: boolean) {
+  return `w-full bg-[#111] border ${error ? "border-red-500/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`;
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-xs font-medium text-white/50 mb-1.5">
@@ -544,12 +600,13 @@ function Field({ label, required, children }: { label: string; required?: boolea
         {required && <span className="text-[#ff9b7a] ml-0.5">*</span>}
       </label>
       {children}
+      {error && <p className="text-[10px] text-red-400 mt-1">{error}</p>}
     </div>
   );
 }
 
 function LinkField({
-  label, icon: Icon, placeholder, value, onChange, required,
+  label, icon: Icon, placeholder, value, onChange, required, readOnly, error
 }: {
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -558,18 +615,21 @@ function LinkField({
   value: string;
   onChange: (v: string) => void;
   required?: boolean;
+  readOnly?: boolean;
+  error?: string;
 }) {
   return (
-    <Field label={label} required={required}>
+    <Field label={label} required={required} error={error}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-9 flex items-center justify-center text-white/20 border border-white/10 bg-white/5 rounded-l-lg border-r-0">
+        <div className={`w-8 h-9 flex items-center justify-center ${error ? "text-red-400 border-red-500/50" : "text-white/20 border-white/10"} border bg-white/5 rounded-l-lg border-r-0`}>
           <Icon size={14} />
         </div>
         <input
-          className="flex-1 bg-[#111] border border-white/10 focus:border-[#ff9b7a]/50 rounded-r-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors"
+          className={`flex-1 bg-[#111] border ${error ? "border-red-500/50" : "border-white/10"} focus:border-[#ff9b7a]/50 rounded-r-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none transition-colors`}
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          readOnly={readOnly}
         />
       </div>
     </Field>
