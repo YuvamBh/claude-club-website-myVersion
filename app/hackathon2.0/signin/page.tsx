@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { Trophy, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
-export default function HackathonSignInPage() {
+function SignInContent() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
@@ -111,5 +111,19 @@ export default function HackathonSignInPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function HackathonSignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#111111] flex items-center justify-center px-4">
+          <div className="text-white/50 text-sm">Loading...</div>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }
