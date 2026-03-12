@@ -37,20 +37,25 @@ export default async function PlatformLayout({
           <p className="text-xs text-white/30 mt-1 pl-7">Platform</p>
         </div>
 
-        {/* Participant nav */}
+        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          <p className="text-[10px] uppercase tracking-widest text-white/30 px-2 pb-1.5 pt-1">
-            Participant
-          </p>
-          <NavItem href="/hackathon2.0/dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavItem href="/hackathon2.0/apply" icon={ClipboardList} label="Application" />
-          <NavItem href="/hackathon2.0/team" icon={Users} label="My Team" />
-          <NavItem href="/hackathon2.0/submit" icon={Send} label="Submit Project" />
+          {/* Participant section */}
+          {!isAdmin && (
+            <>
+              <p className="text-[10px] uppercase tracking-widest text-white/30 px-2 pb-1.5 pt-1">
+                Participant
+              </p>
+              <NavItem href="/hackathon2.0/dashboard" icon={LayoutDashboard} label="Dashboard" />
+              <NavItem href="/hackathon2.0/apply" icon={ClipboardList} label="Application" />
+              <NavItem href="/hackathon2.0/team" icon={Users} label="My Team" />
+              <NavItem href="/hackathon2.0/submit" icon={Send} label="Submit Project" />
+            </>
+          )}
 
           {/* Admin section */}
           {isAdmin && (
             <>
-              <p className="text-[10px] uppercase tracking-widest text-white/30 px-2 pb-1.5 pt-4">
+              <p className="text-[10px] uppercase tracking-widest text-white/30 px-2 pb-1.5 pt-1">
                 Admin
               </p>
               <NavItem href="/hackathon2.0/admin" icon={BarChart3} label="Overview" />
