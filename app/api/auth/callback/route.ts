@@ -29,9 +29,15 @@ export async function GET(request: NextRequest) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Enforce @asu.edu restriction
+      // Enforce @asu.edu restriction (with optional test email bypass)
       const email = data.session?.user?.email ?? "";
-      if (!email.endsWith("@asu.edu")) {
+      const allowedTestEmails = (process.env.ALLOWED_TEST_EMAILS ?? "")
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+      const isTestEmail = allowedTestEmails.includes(email.toLowerCase());
+
+      if (!email.endsWith("@asu.edu") && !isTestEmail) {
         await supabase.auth.signOut();
         return NextResponse.redirect(
           `${origin}/hackathon2.0/signin?error=domain`

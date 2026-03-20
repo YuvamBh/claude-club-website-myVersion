@@ -430,7 +430,7 @@ export async function getAllParticipants(hackathonId: string) {
   const db = createAdminClient();
   const { data, error } = await db
     .from("hackathon_users")
-    .select(`*, hackathon_checkins(*, hackathon_checkin_days(*)), hackathon_team_members(*, hackathon_teams(*))`)
+    .select(`*, hackathon_checkins!hackathon_checkins_user_id_fkey(*, hackathon_checkin_days(*)), hackathon_team_members(*, hackathon_teams(*))`)
     .neq("role", "ADMIN")
     .order("name");
 

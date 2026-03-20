@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getHackathonUser } from "@/lib/hackathon2.0/rbac";
+import { createClient } from "@/lib/supabase/server";
 import { HackathonSidebar } from "./HackathonSidebar";
 import { type LucideIcon } from "lucide-react";
 
@@ -9,8 +10,12 @@ export default async function PlatformLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) redirect("/hackathon2.0/signin");
+
   const user = await getHackathonUser();
-  if (!user) redirect("/hackathon2.0/signin");
+  if (!user) redirect("/hackathon2.0/not-registered");
 
   const isAdmin = user.role === "ADMIN";
 

@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
-import { getActiveHackathon, getAllApplications } from "@/lib/hackathon2.0/queries";
-import { Search, ExternalLink, FileText } from "lucide-react";
+import { getActiveHackathon, getAllParticipants, getCheckinDays } from "@/lib/hackathon2.0/queries";
+import { CheckCircle2, Circle, Users, Github } from "lucide-react";
 
-export const metadata = { title: "Applicants - HackASU Admin" };
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Participants – HackASU Admin" };
 
-export default async function AdminApplicantsPage({
+export default async function AdminParticipantsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ q?: string; checkin?: string }>;
 }) {
   await requireAdmin();
   const hackathon = await getActiveHackathon();
@@ -16,52 +16,62 @@ export default async function AdminApplicantsPage({
 
   if (!hackathon) return <p className="text-white/40">No active hackathon.</p>;
 
-  const allApplications = await getAllApplications(hackathon.id);
+  const [participants, days] = await Promise.all([
+    getAllParticipants(hackathon.id),
+    getCheckinDays(hackathon.id),
+  ]);
 
-  // Filter
-  const filtered = allApplications.filter((a) => {
-    const matchStatus = !params.status || a.status === params.status;
-    const q = params.q?.toLowerCase() ?? "";
+  const q = params.q?.toLowerCase() ?? "";
+  const checkinFilter = params.checkin;
+
+  const filtered = participants.filter((p: any) => {
     const matchQ =
       !q ||
-      a.user.name.toLowerCase().includes(q) ||
-      a.user.email.toLowerCase().includes(q) ||
-      (a.university ?? "").toLowerCase().includes(q) ||
-      (a.major ?? "").toLowerCase().includes(q);
-    return matchStatus && matchQ;
+      p.name?.toLowerCase().includes(q) ||
+      p.email?.toLowerCase().includes(q) ||
+      (p.major ?? "").toLowerCase().includes(q) ||
+      (p.year ?? "").toLowerCase().includes(q);
+
+    const matchCheckin =
+      !checkinFilter ||
+      (checkinFilter === "none"
+        ? p.checkins.length === 0
+        : p.checkins.some((c: any) => c.checkinDayId === checkinFilter));
+
+    return matchQ && matchCheckin;
   });
 
-  const statusCounts = allApplications.reduce<Record<string, number>>((acc, a) => {
-    acc[a.status] = (acc[a.status] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const statuses = ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "WAITLISTED", "REJECTED"];
+  const checkedInToday = (() => {
+    const today = new Date().toISOString().split("T")[0];
+    const todayDay = days.find((d: any) => d.date === today);
+    if (!todayDay) return null;
+    return participants.filter((p: any) =>
+      p.checkins.some((c: any) => c.checkinDayId === todayDay.id)
+    ).length;
+  })();
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Applicants</h1>
-        <p className="text-sm text-white/40 mt-1">
-          {allApplications.length} total applications
+        <h1 className="text-xl sm:text-2xl font-bold text-white">Participants</h1>
+        <p className="text-xs text-white/30 mt-1">
+          {participants.length} registered
+          {checkedInToday !== null && (
+            <> · <span className="text-green-400">{checkedInToday} checked in today</span></>
+          )}
         </p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         <form className="flex items-center gap-2">
-          <div className="relative">
-            <Search
-              size={13}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30"
-            />
-            <input
-              name="q"
-              defaultValue={params.q}
-              placeholder="Search name, email, school…"
-              className="bg-[#1a1a1a] border border-white/10 focus:border-[#ff9b7a]/50 rounded-lg pl-8 pr-3 py-1.5 text-sm text-white/70 placeholder-white/20 outline-none w-64"
-            />
-          </div>
+          <input
+            name="q"
+            defaultValue={params.q}
+            placeholder="Search name, email, major…"
+            className="bg-[#1a1a1a] border border-white/10 focus:border-[#ff9b7a]/50 rounded-lg px-3 py-1.5 text-sm text-white/70 placeholder-white/20 outline-none w-56"
+          />
+          {checkinFilter && <input type="hidden" name="checkin" value={checkinFilter} />}
           <button
             type="submit"
             className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/50 rounded-lg transition-colors"
@@ -70,90 +80,167 @@ export default async function AdminApplicantsPage({
           </button>
         </form>
 
-        <div className="flex flex-wrap gap-1.5">
-          <StatusFilter status="" current={params.status} label={`All (${allApplications.length})`} />
-          {statuses.map((s) => (
-            <StatusFilter
-              key={s}
-              status={s}
-              current={params.status}
-              label={`${s} (${statusCounts[s] ?? 0})`}
+        {days.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            <FilterPill href="/hackathon2.0/admin/applicants" active={!checkinFilter} label="All" />
+            {days.map((d: any) => (
+              <FilterPill
+                key={d.id}
+                href={`/hackathon2.0/admin/applicants?checkin=${d.id}`}
+                active={checkinFilter === d.id}
+                label={`${d.label} ✓`}
+              />
+            ))}
+            <FilterPill
+              href="/hackathon2.0/admin/applicants?checkin=none"
+              active={checkinFilter === "none"}
+              label="Not checked in"
             />
-          ))}
-        </div>
+          </div>
+        )}
       </div>
 
+      {/* Per-day check-in stats */}
+      {days.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {days.map((d: any) => {
+            const count = participants.filter((p: any) =>
+              p.checkins.some((c: any) => c.checkinDayId === d.id)
+            ).length;
+            const pct =
+              participants.length > 0
+                ? Math.round((count / participants.length) * 100)
+                : 0;
+            const today = new Date().toISOString().split("T")[0];
+            const isToday = d.date === today;
+            return (
+              <div
+                key={d.id}
+                className={`rounded-lg border p-3 ${
+                  isToday
+                    ? "border-[#ff9b7a]/30 bg-[#ff9b7a]/8"
+                    : "border-white/8 bg-[#1a1a1a]"
+                }`}
+              >
+                <p className={`text-xs ${isToday ? "text-[#ff9b7a]" : "text-white/40"}`}>
+                  {d.label}
+                </p>
+                <p
+                  className={`text-xl font-bold mt-0.5 ${
+                    isToday ? "text-white" : "text-white/60"
+                  }`}
+                >
+                  {count}
+                </p>
+                <p className={`text-xs ${isToday ? "text-white/40" : "text-white/20"}`}>
+                  {pct}% of {participants.length}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Table */}
-      <div className="rounded-xl border border-white/10 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-xl border border-white/10 overflow-x-auto">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="border-b border-white/10 bg-white/3">
-              <th className="text-left text-xs text-white/40 font-medium px-4 py-3">Applicant</th>
+              <th className="text-left text-xs text-white/40 font-medium px-4 py-3">Participant</th>
               <th className="text-left text-xs text-white/40 font-medium px-4 py-3 hidden md:table-cell">
-                School / Major
+                Year / Major
               </th>
+              {days.map((d: any) => (
+                <th
+                  key={d.id}
+                  className="text-center text-xs text-white/40 font-medium px-3 py-3 whitespace-nowrap"
+                >
+                  {d.label}
+                </th>
+              ))}
+              <th className="text-left text-xs text-white/40 font-medium px-4 py-3">Team</th>
               <th className="text-left text-xs text-white/40 font-medium px-4 py-3 hidden lg:table-cell">
-                Tracks
+                GitHub
               </th>
-              <th className="text-left text-xs text-white/40 font-medium px-4 py-3 hidden sm:table-cell">
-                Team
-              </th>
-              <th className="text-left text-xs text-white/40 font-medium px-4 py-3">Status</th>
-              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-white/30 text-sm">
-                  No applications match your filters.
+                <td
+                  colSpan={4 + days.length}
+                  className="px-4 py-10 text-center text-white/30 text-sm"
+                >
+                  {participants.length === 0
+                    ? "No participants yet. Use the Import page to add participants from your Google Sheet."
+                    : "No participants match your search."}
                 </td>
               </tr>
             ) : (
-              filtered.map((app) => {
-                const team = app.user.teamMemberships?.[0]?.team;
+              filtered.map((p: any) => {
+                const membership = p.teamMemberships?.[0];
+                const team = membership?.hackathonTeams ?? membership?.team;
+                const checkedDayIds = new Set(
+                  p.checkins.map((c: any) => c.checkinDayId)
+                );
                 return (
                   <tr
-                    key={app.id}
+                    key={p.id}
                     className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-white/80">{app.user.name}</p>
-                      <p className="text-xs text-white/30">{app.user.email}</p>
+                      <p className="font-medium text-white/80 truncate max-w-[200px]">
+                        {p.name}
+                      </p>
+                      <p className="text-xs text-white/30 truncate max-w-[200px]">
+                        {p.email}
+                      </p>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-white/60">{app.university ?? "-"}</p>
-                      <p className="text-xs text-white/30">{app.major ?? ""} · {app.year ?? ""}</p>
+                      <p className="text-xs text-white/50">{p.year ?? "-"}</p>
+                      <p className="text-xs text-white/30">{p.major ?? ""}</p>
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {(app.desiredTracks ?? []).slice(0, 2).map((t: any) => (
-                          <span
-                            key={t}
-                            className="text-[10px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
+                    {days.map((d: any) => (
+                      <td key={d.id} className="px-3 py-3 text-center">
+                        {checkedDayIds.has(d.id) ? (
+                          <CheckCircle2 size={15} className="text-green-400 mx-auto" />
+                        ) : (
+                          <Circle size={15} className="text-white/15 mx-auto" />
+                        )}
+                      </td>
+                    ))}
+                    <td className="px-4 py-3">
                       {team ? (
-                        <p className="text-xs text-white/50">{team.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          <Users size={11} className="text-white/30 shrink-0" />
+                          <span className="text-xs text-white/60 truncate max-w-[120px]">
+                            {team.name}
+                          </span>
+                        </div>
                       ) : (
-                        <p className="text-xs text-white/20">No team</p>
+                        <span className="text-xs text-white/20">No team</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={app.status} />
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/hackathon2.0/admin/applicants/${app.id}`}
-                        className="text-xs text-[#ff9b7a] hover:text-[#ffb89e] transition-colors flex items-center gap-1"
-                      >
-                        View <ExternalLink size={11} />
-                      </Link>
+                    <td className="px-4 py-3 hidden lg:table-cell">
+                      {p.github ? (
+                        <a
+                          href={
+                            p.github.startsWith("http")
+                              ? p.github
+                              : `https://github.com/${p.github}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs text-[#ff9b7a] hover:text-[#ffb89e]"
+                        >
+                          <Github size={11} />
+                          <span className="truncate max-w-[100px]">
+                            {p.github.replace(/^https?:\/\/(www\.)?github\.com\//, "")}
+                          </span>
+                        </a>
+                      ) : (
+                        <span className="text-xs text-white/20">-</span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -162,23 +249,26 @@ export default async function AdminApplicantsPage({
           </tbody>
         </table>
       </div>
+
+      <p className="text-xs text-white/20 mt-3">
+        {filtered.length} of {participants.length} participants shown
+      </p>
     </div>
   );
 }
 
-function StatusFilter({
-  status,
-  current,
+function FilterPill({
+  href,
+  active,
   label,
 }: {
-  status: string;
-  current?: string;
+  href: string;
+  active: boolean;
   label: string;
 }) {
-  const active = status === (current ?? "");
   return (
     <a
-      href={`/hackathon2.0/admin/applicants${status ? `?status=${status}` : ""}`}
+      href={href}
       className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
         active
           ? "bg-[#ff9b7a]/20 border-[#ff9b7a]/40 text-[#ff9b7a]"
@@ -187,21 +277,5 @@ function StatusFilter({
     >
       {label}
     </a>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    DRAFT: "bg-white/5 text-white/40",
-    SUBMITTED: "bg-blue-500/10 text-blue-400",
-    ACCEPTED: "bg-green-500/10 text-green-400",
-    REJECTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
-    WAITLISTED: "bg-yellow-500/10 text-yellow-400",
-    UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
-  };
-  return (
-    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${map[status] ?? "bg-white/5 text-white/40"}`}>
-      {status}
-    </span>
   );
 }

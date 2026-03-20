@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { signInWithGoogle } from "@/lib/auth-client";
-import { Trophy, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
+import { Trophy, AlertCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 function SignInContent() {
@@ -72,33 +72,6 @@ function SignInContent() {
           <p className="text-xs text-white/20 mt-4">
             Only @asu.edu accounts are permitted.
           </p>
-        </div>
-
-        {/* Not a participant section */}
-        <div className="mt-8 rounded-2xl border border-white/5 bg-[#1a1a1a]/50 p-6">
-          <h2 className="text-sm font-medium text-white/80 mb-4 text-center">
-            Not an ASU student?
-          </h2>
-          <div className="space-y-3">
-             <a href="#" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/20 flex items-center justify-center text-[#ff9b7a]">
-                    <Trophy size={14} />
-                  </div>
-                  <span className="text-sm text-white/90 font-medium tracking-wide">Become a Sponsor</span>
-                </div>
-                <ChevronRight size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
-             </a>
-             <a href="#" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/20 flex items-center justify-center text-[#ff9b7a]">
-                    <ExternalLink size={14} />
-                  </div>
-                  <span className="text-sm text-white/90 font-medium tracking-wide">Join as a Mentor/Judge</span>
-                </div>
-                <ChevronRight size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
-             </a>
-          </div>
         </div>
 
         <p className="text-center mt-6">

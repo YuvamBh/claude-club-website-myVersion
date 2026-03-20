@@ -31,7 +31,12 @@ export interface HackathonUser {
 
 /**
  * Returns the HackathonUser for the current Supabase session.
- * Creates the row on first access (upsert pattern).
+ * 
+ * On first login:
+ *  1. Checks if a pre-seeded row exists for this email (from Google Sheet import).
+ *     If yes → links the auth user_id to it (so pre-registered users don't start fresh).
+ *  2. If no pre-seeded row → creates a new row via upsert.
+ * 
  * Returns null when not authenticated.
  */
 export async function getHackathonUser(): Promise<HackathonUser | null> {
@@ -49,32 +54,42 @@ export async function getHackathonUser(): Promise<HackathonUser | null> {
     "Anonymous";
 
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("hackathon_users")
-    .upsert(
-      { user_id: userId, email: email ?? "", name },
-      { onConflict: "user_id", ignoreDuplicates: false }
-    )
-    .select()
-    .single();
 
-  if (error) {
-    // If it fails with concurrent unique constraint violation on email (23505),
-    // it means a concurrent request already created the row. Fetch it.
-    if (error.code === "23505") {
-      const { data: existingData } = await admin
-        .from("hackathon_users")
-        .select()
-        .eq("user_id", userId)
-        .single();
-      
-      if (existingData) return existingData as HackathonUser;
-    }
-    console.error("getHackathonUser upsert error:", error);
+  // Look up all rows for this email (handles duplicates from prior auth upserts)
+  const { data: rows } = await admin
+    .from("hackathon_users")
+    .select()
+    .eq("email", email ?? "");
+
+  if (!rows || rows.length === 0) {
+    // Not pre-registered - platform access denied
     return null;
   }
 
-  return data as HackathonUser;
+  // Find a pre-seeded row (user_id is null) - this is the canonical row
+  const preSeeded = rows.find((r) => r.user_id === null);
+  if (preSeeded) {
+    // Delete any orphan rows created by a prior auth upsert
+    const orphans = rows.filter((r) => r.id !== preSeeded.id);
+    if (orphans.length > 0) {
+      await admin
+        .from("hackathon_users")
+        .delete()
+        .in("id", orphans.map((r) => r.id));
+    }
+    // Link the auth user_id to the pre-seeded row
+    const { data: linked } = await admin
+      .from("hackathon_users")
+      .update({ user_id: userId, name })
+      .eq("id", preSeeded.id)
+      .select()
+      .single();
+    return (linked ?? preSeeded) as HackathonUser;
+  }
+
+  // All rows already have user_ids - find the one matching this auth user
+  const matched = rows.find((r) => r.user_id === userId);
+  return (matched ?? rows[0]) as HackathonUser;
 }
 
 // ─── Guards ──────────────────────────────────────────────────────────────────
@@ -84,9 +99,13 @@ export async function getHackathonUser(): Promise<HackathonUser | null> {
  * Redirects to /hackathon/signin if not authenticated.
  */
 export async function requireAuth(): Promise<HackathonUser> {
-  const user = await getHackathonUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/hackathon2.0/signin");
-  return user;
+
+  const hackUser = await getHackathonUser();
+  if (!hackUser) redirect("/hackathon2.0/not-registered");
+  return hackUser;
 }
 
 /**
@@ -99,38 +118,8 @@ export async function requireAdmin(): Promise<HackathonUser> {
   return user;
 }
 
-// ─── Permission checks (use in server actions) ────────────────────────────────
+// ─── Permission helpers ───────────────────────────────────────────────────────
 
-export function isAdmin(user: HackathonUser): boolean {
-  return user.role === "ADMIN";
-}
-
-export function canEditApplication(
-  user: HackathonUser,
-  applicationUserId: string,
-  deadline: Date | null
-): boolean {
-  if (user.role === "ADMIN") return true;
-  if (user.id !== applicationUserId) return false;
-  if (deadline && new Date() > deadline) return false;
-  return true;
-}
-
-export function canEditSubmission(
-  user: HackathonUser,
-  teamCaptainUserId: string,
-  deadline: Date | null
-): boolean {
-  if (user.role === "ADMIN") return true;
-  if (user.id !== teamCaptainUserId) return false;
-  if (deadline && new Date() > deadline) return false;
-  return true;
-}
-
-export function canManageTeam(
-  user: HackathonUser,
-  captainUserId: string
-): boolean {
-  if (user.role === "ADMIN") return true;
-  return user.id === captainUserId;
+export function canManageTeam(user: HackathonUser, teamCaptainUserId: string): boolean {
+  return user.id === teamCaptainUserId || user.role === "ADMIN";
 }

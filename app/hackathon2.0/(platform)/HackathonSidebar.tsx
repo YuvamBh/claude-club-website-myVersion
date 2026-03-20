@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  LayoutDashboard,
   Users,
   Send,
   BarChart3,
@@ -15,6 +14,8 @@ import {
   MapPin,
   Star,
   UserCheck,
+  Upload,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import { SignOutButton } from "./SignOutButton";
@@ -46,7 +47,7 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
         </button>
       </div>
 
-      {/* Sidebar — desktop fixed, mobile overlay */}
+      {/* Sidebar - desktop fixed, mobile overlay */}
       <aside
         className={`fixed inset-y-0 left-0 w-60 border-r border-white/10 flex flex-col bg-[#161616] z-50 transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -70,10 +71,10 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
           {!isAdmin && !isJudge && (
             <>
               <SectionLabel>Participant</SectionLabel>
-              <NavItem href="/hackathon2.0/dashboard" icon={LayoutDashboard} label="Dashboard"      onClick={close} />
-              <NavItem href="/hackathon2.0/checkin"   icon={MapPin}          label="Check In"       onClick={close} />
-              <NavItem href="/hackathon2.0/team"       icon={Users}           label="My Team"        onClick={close} />
-              <NavItem href="/hackathon2.0/submit"     icon={Send}            label="Submit Project" onClick={close} />
+              <NavItem href="/hackathon2.0/checkin" icon={MapPin} label="Check In"    onClick={close} />
+              <NavItem href="/hackathon2.0/team"    icon={Users}  label="Team"        onClick={close} />
+              <NavItem href="/hackathon2.0/submit"  icon={Send}   label="Submissions" onClick={close} />
+              <NavItem href="/hackathon2.0/tracks"  icon={Zap}    label="Tracks"      onClick={close} />
             </>
           )}
 
@@ -84,6 +85,7 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
               <NavItem href="/hackathon2.0/admin"              icon={BarChart3} label="Overview"     onClick={close} />
               <NavItem href="/hackathon2.0/admin/scanner"      icon={QrCode}    label="QR Scanner"   onClick={close} />
               <NavItem href="/hackathon2.0/admin/applicants"   icon={UserCheck} label="Participants" onClick={close} />
+              <NavItem href="/hackathon2.0/admin/import"       icon={Upload}    label="Import"        onClick={close} />
               <NavItem href="/hackathon2.0/admin/teams"        icon={Users}     label="Teams"        onClick={close} />
               <NavItem href="/hackathon2.0/admin/submissions"  icon={Send}      label="Submissions"  onClick={close} />
               <NavItem href="/hackathon2.0/admin/judging"      icon={Star}      label="Judging"      onClick={close} />

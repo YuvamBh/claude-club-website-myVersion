@@ -651,6 +651,7 @@ export async function checkinWithLocation(
 
   revalidatePath("/hackathon2.0/checkin");
   revalidatePath("/hackathon2.0/dashboard");
+  revalidatePath("/hackathon2.0/admin");
   return { success: true, data: { checkedIn: true } };
 }
 
