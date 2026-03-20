@@ -423,3 +423,127 @@ export async function getAdminStats(hackathonId: string) {
     draftSubmissions: draftSubmissions ?? 0,
   } as any;
 }
+
+// ─── Participants (for admin view) ────────────────────────────────────────────
+
+export async function getAllParticipants(hackathonId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_users")
+    .select(`*, hackathon_checkins(*, hackathon_checkin_days(*)), hackathon_team_members(*, hackathon_teams(*))`)
+    .neq("role", "ADMIN")
+    .order("name");
+
+  if (error) throw error;
+  return (data ?? []).map((u) => {
+    const n = normalize(u) as Row;
+    return {
+      ...n,
+      checkins: normalize(u.hackathon_checkins ?? []).filter((c: Row) => c.hackathonId === hackathonId),
+      teamMemberships: normalize(u.hackathon_team_members ?? []),
+    } as any;
+  });
+}
+
+// ─── Check-in ─────────────────────────────────────────────────────────────────
+
+export async function getCheckinDays(hackathonId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_checkin_days")
+    .select("*")
+    .eq("hackathon_id", hackathonId)
+    .order("order");
+
+  if (error) throw error;
+  return (data ?? []).map(normalize) as any[];
+}
+
+export async function getUserCheckins(userId: string, hackathonId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_checkins")
+    .select("*, hackathon_checkin_days(*)")
+    .eq("user_id", userId)
+    .eq("hackathon_id", hackathonId);
+
+  if (error) throw error;
+  return (data ?? []).map((c) => ({
+    ...normalize(c),
+    day: normalize(c.hackathon_checkin_days),
+  })) as any[];
+}
+
+export async function getUserByQrToken(qrToken: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_users")
+    .select("*")
+    .eq("qr_token", qrToken)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? (normalize(data) as any) : null;
+}
+
+// ─── Judging ──────────────────────────────────────────────────────────────────
+
+export async function getJudgeScoresForSubmission(submissionId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_judge_scores")
+    .select("*, hackathon_judging_criteria(*), hackathon_users(name)")
+    .eq("submission_id", submissionId);
+
+  if (error) throw error;
+  return (data ?? []).map((s) => ({
+    ...normalize(s),
+    criterion: normalize(s.hackathon_judging_criteria),
+    judge: normalize(s.hackathon_users),
+  })) as any[];
+}
+
+export async function getAllSubmissionsForJudging(hackathonId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_submissions")
+    .select(`
+      id, project_name, tagline, status, track_id, submitted_at,
+      hackathon_teams(name, hackathon_tracks(name), hackathon_team_members(hackathon_users(name))),
+      hackathon_judge_scores(judge_id, score, criterion_id)
+    `)
+    .eq("hackathon_id", hackathonId)
+    .eq("status", "SUBMITTED")
+    .order("submitted_at", { ascending: false, nullsFirst: false });
+
+  if (error) throw error;
+  return (data ?? []).map((sub) => {
+    const n = normalize(sub) as Row;
+    const t = sub.hackathon_teams as Row;
+    const scores = (sub.hackathon_judge_scores ?? []) as Row[];
+    const totalScore = scores.length > 0
+      ? scores.reduce((sum: number, s: Row) => sum + (s.score ?? 0), 0) / scores.length
+      : null;
+    return {
+      ...n,
+      team: t ? { ...normalize(t), track: normalize(t.hackathon_tracks ?? null) } : null,
+      scores: normalize(scores),
+      avgScore: totalScore ? Math.round(totalScore * 10) / 10 : null,
+    } as any;
+  });
+}
+
+export async function getAdminCheckinStats(hackathonId: string) {
+  const db = createAdminClient();
+  const days = await getCheckinDays(hackathonId);
+  const stats = await Promise.all(
+    days.map(async (day: any) => {
+      const { count } = await db
+        .from("hackathon_checkins")
+        .select("*", { count: "exact", head: true })
+        .eq("checkin_day_id", day.id);
+      return { ...day, checkedInCount: count ?? 0 };
+    })
+  );
+  return stats as any[];
+}

@@ -22,6 +22,7 @@ export interface HackathonUser {
   email: string;
   name: string;
   role: HackathonRole;
+  qrToken?: string;
   created_at: string;
   updated_at: string;
 }

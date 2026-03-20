@@ -590,3 +590,179 @@ export async function upsertAnnouncement(data: {
   revalidatePath("/hackathon2.0/admin/content");
   return { success: true, data: result.data };
 }
+
+// ─── Check-in ─────────────────────────────────────────────────────────────────
+
+/** Haversine distance in meters between two lat/lng points */
+function distanceMeters(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371000;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLng = (lng2 - lng1) * rad;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export async function checkinWithLocation(
+  hackathonId: string,
+  checkinDayId: string,
+  lat: number,
+  lng: number
+): Promise<ActionResult<{ checkedIn: true }>> {
+  const user = await requireAuth();
+  const db = createAdminClient();
+
+  // Fetch venue coordinates
+  const { data: hackathon, error: hErr } = await db
+    .from("hackathons")
+    .select("venue_lat, venue_lng, venue_radius_m")
+    .eq("id", hackathonId)
+    .single();
+
+  if (hErr || !hackathon) return { success: false, error: "Hackathon not found." };
+  if (!hackathon.venue_lat || !hackathon.venue_lng) {
+    return { success: false, error: "Venue coordinates are not configured yet." };
+  }
+
+  const distance = distanceMeters(lat, lng, hackathon.venue_lat, hackathon.venue_lng);
+  const radius = hackathon.venue_radius_m ?? 200;
+  if (distance > radius) {
+    return {
+      success: false,
+      error: `You must be within ${radius}m of the venue to check in. You are currently ${Math.round(distance)}m away.`,
+    };
+  }
+
+  const { error } = await db.from("hackathon_checkins").upsert({
+    user_id: user.id,
+    hackathon_id: hackathonId,
+    checkin_day_id: checkinDayId,
+    method: "LOCATION",
+    latitude: lat,
+    longitude: lng,
+  }, { onConflict: "user_id,checkin_day_id" });
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/hackathon2.0/checkin");
+  revalidatePath("/hackathon2.0/dashboard");
+  return { success: true, data: { checkedIn: true } };
+}
+
+export async function adminCheckinByQr(
+  qrToken: string,
+  checkinDayId: string,
+  hackathonId: string
+): Promise<ActionResult<{ participantName: string }>> {
+  const admin = await requireAdmin();
+  const db = createAdminClient();
+
+  // Look up participant by QR token
+  const { data: participant, error: pErr } = await db
+    .from("hackathon_users")
+    .select("id, name")
+    .eq("qr_token", qrToken)
+    .maybeSingle();
+
+  if (pErr || !participant) return { success: false, error: "QR code not recognised." };
+
+  const { error } = await db.from("hackathon_checkins").upsert({
+    user_id: participant.id,
+    hackathon_id: hackathonId,
+    checkin_day_id: checkinDayId,
+    method: "ADMIN_QR",
+    overridden_by: admin.id,
+  }, { onConflict: "user_id,checkin_day_id" });
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/hackathon2.0/admin/scanner");
+  revalidatePath("/hackathon2.0/admin");
+  return { success: true, data: { participantName: participant.name } };
+}
+
+// ─── Judging ──────────────────────────────────────────────────────────────────
+
+const JudgeScoreSchema = z.object({
+  submissionId: z.string(),
+  criterionId: z.string(),
+  score: z.number().int().min(0).max(100),
+  notes: z.string().optional(),
+});
+
+export async function submitJudgeScore(
+  formData: FormData
+): Promise<ActionResult<{ saved: true }>> {
+  const judge = await requireAuth();
+  if (judge.role !== "JUDGE" && judge.role !== "ADMIN") {
+    return { success: false, error: "Only judges can score submissions." };
+  }
+
+  const raw = {
+    submissionId: formData.get("submissionId"),
+    criterionId: formData.get("criterionId"),
+    score: Number(formData.get("score")),
+    notes: formData.get("notes") ?? undefined,
+  };
+
+  const parsed = JudgeScoreSchema.safeParse(raw);
+  if (!parsed.success) return { success: false, error: "Invalid score data." };
+
+  const db = createAdminClient();
+  const { error } = await db.from("hackathon_judge_scores").upsert({
+    submission_id: parsed.data.submissionId,
+    judge_id: judge.id,
+    criterion_id: parsed.data.criterionId,
+    score: parsed.data.score,
+    notes: parsed.data.notes ?? null,
+  }, { onConflict: "submission_id,judge_id,criterion_id" });
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/hackathon2.0/admin/judging");
+  return { success: true, data: { saved: true } };
+}
+
+// ─── Admin: Update Venue Coordinates ─────────────────────────────────────────
+
+const VenueSchema = z.object({
+  hackathonId: z.string(),
+  venueLat: z.number().min(-90).max(90),
+  venueLng: z.number().min(-180).max(180),
+  venueRadiusM: z.number().int().min(10).max(5000),
+});
+
+export async function updateVenueCoordinates(
+  formData: FormData
+): Promise<ActionResult<{ updated: true }>> {
+  await requireAdmin();
+
+  const parsed = VenueSchema.safeParse({
+    hackathonId: formData.get("hackathonId"),
+    venueLat: Number(formData.get("venueLat")),
+    venueLng: Number(formData.get("venueLng")),
+    venueRadiusM: Number(formData.get("venueRadiusM")),
+  });
+
+  if (!parsed.success) return { success: false, error: "Invalid coordinates." };
+
+  const db = createAdminClient();
+  const { error } = await db
+    .from("hackathons")
+    .update({
+      venue_lat: parsed.data.venueLat,
+      venue_lng: parsed.data.venueLng,
+      venue_radius_m: parsed.data.venueRadiusM,
+    })
+    .eq("id", parsed.data.hackathonId);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/hackathon2.0/admin/content");
+  return { success: true, data: { updated: true } };
+}
