@@ -663,11 +663,11 @@ export async function adminCheckinByQr(
   const admin = await requireAdmin();
   const db = createAdminClient();
 
-  // Look up participant by QR token
+  // Look up participant by id (QR code encodes user.id)
   const { data: participant, error: pErr } = await db
     .from("hackathon_users")
     .select("id, name")
-    .eq("qr_token", qrToken)
+    .eq("id", qrToken)
     .maybeSingle();
 
   if (pErr || !participant) return { success: false, error: "QR code not recognised." };

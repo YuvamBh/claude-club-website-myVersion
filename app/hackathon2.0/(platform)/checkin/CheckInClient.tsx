@@ -232,24 +232,7 @@ export function CheckInClient({
         </div>
       )}
 
-      {/* ── Next actions ── */}
-      <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
-        <h2 className="text-sm font-semibold text-white/60 mb-3">What&apos;s Next</h2>
-        <div className="space-y-2">
-          <Link href="/hackathon2.0/team" className="flex items-center justify-between px-3.5 py-3 rounded-xl bg-white/3 hover:bg-white/6 transition-colors text-sm text-white/50 group">
-            <span>Set up your team</span>
-            <ChevronRight size={14} className="text-white/20 group-hover:text-[#ff9b7a]" />
-          </Link>
-          <Link href="/hackathon2.0/submit" className="flex items-center justify-between px-3.5 py-3 rounded-xl bg-white/3 hover:bg-white/6 transition-colors text-sm text-white/50 group">
-            <span>Submit your project</span>
-            <ChevronRight size={14} className="text-white/20 group-hover:text-[#ff9b7a]" />
-          </Link>
-          <Link href="/hackathon2.0/dashboard" className="flex items-center justify-between px-3.5 py-3 rounded-xl bg-white/3 hover:bg-white/6 transition-colors text-sm text-white/50 group">
-            <span>View dashboard</span>
-            <ChevronRight size={14} className="text-white/20 group-hover:text-[#ff9b7a]" />
-          </Link>
-        </div>
-      </div>
+
     </div>
   );
 }

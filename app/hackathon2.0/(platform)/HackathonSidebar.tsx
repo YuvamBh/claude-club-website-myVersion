@@ -90,6 +90,7 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
               <NavItem href="/hackathon2.0/admin/submissions"  icon={Send}      label="Submissions"  onClick={close} />
               <NavItem href="/hackathon2.0/admin/judging"      icon={Star}      label="Judging"      onClick={close} />
               <NavItem href="/hackathon2.0/admin/content"      icon={Settings}  label="Content"      onClick={close} />
+              <NavItem href="/hackathon2.0/admin/settings"     icon={MapPin}    label="Settings"     onClick={close} />
             </>
           )}
 
