@@ -84,6 +84,24 @@ export async function getActiveHackathon() {
   } as any;
 }
 
+export async function getAdminAnnouncements(hackathonId: string) {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("hackathon_announcements")
+    .select("id, title, content, is_pinned, published_at, created_at")
+    .eq("hackathon_id", hackathonId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return normalize(data ?? []) as Array<{
+    id: string;
+    title: string;
+    content: string;
+    isPinned: boolean;
+    publishedAt: string | null;
+    createdAt: string;
+  }>;
+}
+
 export async function getHackathonBySlug(slug: string) {
   const db = createAdminClient();
   const { data, error } = await db

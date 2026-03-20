@@ -16,6 +16,7 @@ import {
   UserCheck,
   Upload,
   Zap,
+  LayoutDashboard,
   type LucideIcon,
 } from "lucide-react";
 import { SignOutButton } from "./SignOutButton";
@@ -71,10 +72,10 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
           {!isAdmin && !isJudge && (
             <>
               <SectionLabel>Participant</SectionLabel>
-              <NavItem href="/hackathon2.0/checkin" icon={MapPin} label="Check In"    onClick={close} />
-              <NavItem href="/hackathon2.0/team"    icon={Users}  label="Team"        onClick={close} />
-              <NavItem href="/hackathon2.0/submit"  icon={Send}   label="Submissions" onClick={close} />
-              <NavItem href="/hackathon2.0/tracks"  icon={Zap}    label="Tracks"      onClick={close} />
+              <NavItem href="/hackathon2.0/checkin" icon={LayoutDashboard} label="Dashboard"   onClick={close} />
+              <NavItem href="/hackathon2.0/team"    icon={Users}           label="Team"        onClick={close} />
+              <NavItem href="/hackathon2.0/submit"  icon={Send}            label="Submissions" onClick={close} />
+              <NavItem href="/hackathon2.0/tracks"  icon={Zap}             label="Tracks"      onClick={close} />
             </>
           )}
 

@@ -586,9 +586,19 @@ export async function upsertAnnouncement(data: {
 
   if (result.error) return { success: false, error: result.error.message };
 
-  revalidatePath("/hackathon2.0/dashboard");
+  revalidatePath("/hackathon2.0/checkin");
   revalidatePath("/hackathon2.0/admin/content");
   return { success: true, data: result.data };
+}
+
+export async function deleteAnnouncement(id: string): Promise<ActionResult<null>> {
+  await requireAdmin();
+  const db = createAdminClient();
+  const { error } = await db.from("hackathon_announcements").delete().eq("id", id);
+  if (error) return { success: false, error: error.message };
+  revalidatePath("/hackathon2.0/checkin");
+  revalidatePath("/hackathon2.0/admin/content");
+  return { success: true, data: null };
 }
 
 // ─── Check-in ─────────────────────────────────────────────────────────────────
