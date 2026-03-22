@@ -528,7 +528,7 @@ export async function getAllSubmissionsForJudging(hackathonId: string) {
   const { data, error } = await db
     .from("hackathon_submissions")
     .select(`
-      id, project_name, tagline, status, track_id, submitted_at, admin_notes,
+      id, project_name, tagline, status, track_id, submitted_at, admin_notes, bonus_points,
       hackathon_teams(name, hackathon_tracks(name), hackathon_team_members(hackathon_users(name))),
       hackathon_judge_scores(judge_id, score, criterion_id)
     `)
@@ -560,6 +560,9 @@ export async function getAllSubmissionsForJudging(hackathonId: string) {
     if (overrideMatch) {
       finalScore = parseInt(overrideMatch[1]);
     }
+
+    // Add admin bonus points
+    finalScore += (sub.bonus_points ?? 0);
 
     return {
       ...n,

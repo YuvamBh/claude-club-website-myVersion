@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getSubmissionById, getActiveHackathon, getSubmissionRank } from "@/lib/hackathon2.0/queries";
-import { updateSubmissionStatus } from "@/lib/hackathon2.0/actions";
+import { updateSubmissionStatus, setBonusPoints } from "@/lib/hackathon2.0/actions";
 import { ArrowLeft, Github, Video, Globe, FileText, ExternalLink, Crown, Trophy, Target, BarChart3, TrendingUp, Info } from "lucide-react";
 import JudgingForm from "./JudgingForm";
 
@@ -21,6 +21,7 @@ export default async function SubmissionDetailPage({
 
   const { team } = submission;
   const criteria = hackathon?.judgingCriteria ?? [];
+  const track = hackathon?.tracks?.find((t: any) => t.id === submission.trackId) ?? null;
 
   async function handleStatusUpdate(formData: FormData) {
     "use server";
@@ -43,6 +44,11 @@ export default async function SubmissionDetailPage({
         </Link>
         <span className="text-white/20">/</span>
         <span className="text-sm text-white/60">{submission.projectName ?? "Untitled"}</span>
+        {track && (
+          <span className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2 py-0.5 rounded-full">
+            {track.name}
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -122,6 +128,37 @@ export default async function SubmissionDetailPage({
                 placeholder="Internal notes..."
                 className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/60 placeholder-white/20 outline-none min-h-[80px] resize-y"
               />
+            </form>
+          </div>
+
+          {/* Bonus Points */}
+          <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-5">
+            <p className="text-xs text-white/40 uppercase tracking-wide font-medium mb-3">
+              Bonus Points
+            </p>
+            <form action={async (formData: FormData) => {
+              "use server";
+              const pts = parseInt(formData.get("bonus_points") as string ?? "0");
+              await setBonusPoints(id, isNaN(pts) ? 0 : pts);
+            }} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="bonus_points"
+                  min="0"
+                  max="100"
+                  defaultValue={submission.bonusPoints ?? 0}
+                  className="w-20 bg-[#111] border border-white/10 focus:border-[#ff9b7a]/50 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all text-center"
+                />
+                <span className="text-xs text-white/30">/ 100 pts</span>
+              </div>
+              <p className="text-[10px] text-white/20">Added on top of judge score average in rankings.</p>
+              <button
+                type="submit"
+                className="w-full text-xs py-2 px-3 rounded-lg border border-white/10 text-white/40 hover:border-[#ff9b7a]/30 hover:text-[#ff9b7a] transition-colors"
+              >
+                Save Bonus Points
+              </button>
             </form>
           </div>
 

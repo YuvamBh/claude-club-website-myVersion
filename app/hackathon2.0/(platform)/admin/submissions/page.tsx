@@ -19,7 +19,7 @@ export default async function AdminSubmissionsPage({
 
   const filtered = allSubmissions.filter((s) => {
     const matchStatus = !params.status || s.status === params.status;
-    const matchTrack = !params.track || s.team.track?.id === params.track;
+    const matchTrack = !params.track || s.trackId === params.track;
     const q = params.q?.toLowerCase() ?? "";
     const matchQ =
       !q ||
@@ -121,13 +121,16 @@ export default async function AdminSubmissionsPage({
                     <p className="text-xs text-white/30">{sub.team.members.length} members</p>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
-                    {sub.team.track ? (
-                      <span className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2 py-0.5 rounded-full">
-                        {sub.team.track.name}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-white/20">-</span>
-                    )}
+                    {(() => {
+                      const track = hackathon.tracks?.find((t: any) => t.id === sub.trackId);
+                      return track ? (
+                        <span className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2 py-0.5 rounded-full">
+                          {track.name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-white/20">-</span>
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <div className="flex gap-2">

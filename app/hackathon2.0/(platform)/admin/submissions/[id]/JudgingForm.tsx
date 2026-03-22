@@ -25,7 +25,7 @@ export default function JudgingForm({
   const [error, setError] = useState("");
 
   const totalCalculated = criteria.reduce((sum, c) => sum + (scores[c.id] || 0), 0);
-  const maxPossible = criteria.length * 10;
+  const maxPossible = criteria.reduce((sum, c) => sum + (c.maxScore ?? 10), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,15 +72,16 @@ export default function JudgingForm({
                   <input
                     type="number"
                     min="0"
-                    max="10"
+                    max={c.maxScore ?? 10}
                     value={scores[c.id] ?? ""}
                     onChange={(e) => {
-                      const val = e.target.value === "" ? 0 : Math.min(10, Math.max(0, parseInt(e.target.value)));
+                      const max = c.maxScore ?? 10;
+                      const val = e.target.value === "" ? 0 : Math.min(max, Math.max(0, parseInt(e.target.value)));
                       setScores({ ...scores, [c.id]: val });
                     }}
-                    className="w-12 bg-[#111] border border-white/10 focus:border-[#ff9b7a]/50 rounded px-2 py-1 text-sm text-center text-white outline-none transition-all"
+                    className="w-14 bg-[#111] border border-white/10 focus:border-[#ff9b7a]/50 rounded px-2 py-1 text-sm text-center text-white outline-none transition-all"
                   />
-                  <span className="text-xs font-semibold text-white/20">/ 10</span>
+                  <span className="text-xs font-semibold text-white/20">/ {c.maxScore ?? 10}</span>
                 </div>
               </div>
               {c.description && <p className="text-[10px] text-white/40">{c.description}</p>}

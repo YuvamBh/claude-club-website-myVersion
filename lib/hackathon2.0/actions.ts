@@ -750,7 +750,7 @@ const BulkJudgeScoreSchema = z.object({
   submissionId: z.string(),
   scores: z.array(z.object({
     criterionId: z.string(),
-    score: z.number().int().min(0).max(10),
+    score: z.number().int().min(0).max(100),
   })),
   overrideScore: z.number().int().optional(),
   notes: z.string().optional(),
@@ -800,6 +800,31 @@ export async function submitBulkJudgeScores(
 
   revalidatePath(`/hackathon2.0/admin/submissions/${parsed.data.submissionId}`);
   return { success: true, data: { saved: true } };
+}
+
+// ─── Admin: Set Bonus Points ──────────────────────────────────────────────────
+
+export async function setBonusPoints(
+  submissionId: string,
+  bonusPoints: number
+): Promise<ActionResult<{ updated: true }>> {
+  await requireAdmin();
+
+  if (!Number.isInteger(bonusPoints) || bonusPoints < 0 || bonusPoints > 100) {
+    return { success: false, error: "Bonus points must be an integer between 0 and 100." };
+  }
+
+  const db = createAdminClient();
+  const { error } = await db
+    .from("hackathon_submissions")
+    .update({ bonus_points: bonusPoints })
+    .eq("id", submissionId);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath(`/hackathon2.0/admin/submissions/${submissionId}`);
+  revalidatePath("/hackathon2.0/admin/ranking");
+  return { success: true, data: { updated: true } };
 }
 
 // ─── Admin: Update Venue Coordinates ─────────────────────────────────────────
