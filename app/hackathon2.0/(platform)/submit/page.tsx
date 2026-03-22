@@ -381,12 +381,12 @@ export default function SubmitPage() {
                 disabled={isReadOnly}
               >
                 <option value="">Select a track</option>
-                <option value="Biology & Physical Health">1a. Biology & Physical Health</option>
-                <option value="Mental Health">1b. Mental Health</option>
-                <option value="AI Tooling">2. AI Tooling</option>
-                <option value="Economic Empowerment & Education">3. Economic Empowerment & Education</option>
-                <option value="Governance and Collaboration">4. Governance and Collaboration</option>
-                <option value="Creative Flourishing">5. Creative Flourishing</option>
+                <option value="track_cbc-hackathon-2026-seed_0">1a. Biology & Physical Health</option>
+                <option value="track_cbc-hackathon-2026-seed_1">1b. Mental Health</option>
+                <option value="track_cbc-hackathon-2026-seed_2">2. AI Tooling</option>
+                <option value="track_cbc-hackathon-2026-seed_3">3. Economic Empowerment & Education</option>
+                <option value="track_cbc-hackathon-2026-seed_4">4. Governance and Collaboration</option>
+                <option value="track_cbc-hackathon-2026-seed_5">5. Creative Flourishing</option>
               </select>
             </Field>
             <Field label="Short Description (max 500 chars)" error={errors.shortDescription}>

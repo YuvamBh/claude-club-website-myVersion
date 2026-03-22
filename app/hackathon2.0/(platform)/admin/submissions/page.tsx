@@ -71,6 +71,15 @@ export default async function AdminSubmissionsPage({
             />
           ))}
         </div>
+        <div className="flex flex-wrap gap-1.5">
+          <TrackFilter trackId="" current={params.track} label="All Tracks" />
+          {hackathon.tracks?.map((t: any) => {
+            const count = allSubmissions.filter((s) => s.trackId === t.id).length;
+            return (
+              <TrackFilter key={t.id} trackId={t.id} current={params.track} label={`${t.name} (${count})`} />
+            );
+          })}
+        </div>
       </div>
 
       {/* Table */}
@@ -177,6 +186,22 @@ export default async function AdminSubmissionsPage({
         </table>
       </div>
     </div>
+  );
+}
+
+function TrackFilter({ trackId, current, label }: { trackId: string; current?: string; label: string }) {
+  const active = trackId === (current ?? "");
+  return (
+    <a
+      href={`/hackathon2.0/admin/submissions${trackId ? `?track=${trackId}` : ""}`}
+      className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+        active
+          ? "bg-[#7ab8ff]/20 border-[#7ab8ff]/40 text-[#7ab8ff]"
+          : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
+      }`}
+    >
+      {label}
+    </a>
   );
 }
 
