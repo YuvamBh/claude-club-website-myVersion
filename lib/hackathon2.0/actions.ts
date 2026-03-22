@@ -566,7 +566,7 @@ export async function updateApplicationStatus(
 
 export async function updateSubmissionStatus(
   submissionId: string,
-  status: "UNDER_REVIEW" | "SHORTLISTED" | "WINNER" | "DISQUALIFIED",
+  status: "SHORTLISTED" | "WINNER" | "REJECTED",
   adminNotes?: string
 ): Promise<ActionResult> {
   await requireAdmin();
@@ -746,43 +746,59 @@ export async function adminCheckinByQr(
 
 // ─── Judging ──────────────────────────────────────────────────────────────────
 
-const JudgeScoreSchema = z.object({
+const BulkJudgeScoreSchema = z.object({
   submissionId: z.string(),
-  criterionId: z.string(),
-  score: z.number().int().min(0).max(100),
+  scores: z.array(z.object({
+    criterionId: z.string(),
+    score: z.number().int().min(0).max(10),
+  })),
+  overrideScore: z.number().int().optional(),
   notes: z.string().optional(),
 });
 
-export async function submitJudgeScore(
-  formData: FormData
+export async function submitBulkJudgeScores(
+  payload: any
 ): Promise<ActionResult<{ saved: true }>> {
   const judge = await requireAuth();
   if (judge.role !== "JUDGE" && judge.role !== "ADMIN") {
     return { success: false, error: "Only judges can score submissions." };
   }
 
-  const raw = {
-    submissionId: formData.get("submissionId"),
-    criterionId: formData.get("criterionId"),
-    score: Number(formData.get("score")),
-    notes: formData.get("notes") ?? undefined,
-  };
-
-  const parsed = JudgeScoreSchema.safeParse(raw);
+  const parsed = BulkJudgeScoreSchema.safeParse(payload);
   if (!parsed.success) return { success: false, error: "Invalid score data." };
 
   const db = createAdminClient();
-  const { error } = await db.from("hackathon_judge_scores").upsert({
-    submission_id: parsed.data.submissionId,
-    judge_id: judge.id,
-    criterion_id: parsed.data.criterionId,
-    score: parsed.data.score,
-    notes: parsed.data.notes ?? null,
-  }, { onConflict: "submission_id,judge_id,criterion_id" });
 
-  if (error) return { success: false, error: error.message };
+  if (parsed.data.scores.length > 0) {
+    const scoresToInsert = parsed.data.scores.map(s => ({
+      submission_id: parsed.data.submissionId,
+      judge_id: judge.id,
+      criterion_id: s.criterionId,
+      score: s.score,
+    }));
+    const { error: scoresError } = await db.from("hackathon_judge_scores").upsert(
+      scoresToInsert, 
+      { onConflict: "submission_id,judge_id,criterion_id" }
+    );
+    if (scoresError) return { success: false, error: scoresError.message };
+  }
 
-  revalidatePath("/hackathon2.0/admin/judging");
+  const baseNotes = parsed.data.notes?.trim() || "";
+  let finalNotes = baseNotes;
+  if (parsed.data.overrideScore !== undefined) {
+     finalNotes = `[Manual Override Final Score: ${parsed.data.overrideScore}]\n${baseNotes}`;
+  }
+
+  if (finalNotes) {
+     const { data: sub } = await db.from("hackathon_submissions").select("admin_notes").eq("id", parsed.data.submissionId).single();
+     const existingNotes = sub?.admin_notes || "";
+     const mergedNotes = existingNotes ? `${existingNotes}\n\n[Judge ${judge.name}]: ${finalNotes}` : `[Judge ${judge.name}]: ${finalNotes}`;
+     
+     const { error: notesError } = await db.from("hackathon_submissions").update({ admin_notes: mergedNotes }).eq("id", parsed.data.submissionId);
+     if (notesError) return { success: false, error: notesError.message };
+  }
+
+  revalidatePath(`/hackathon2.0/admin/submissions/${parsed.data.submissionId}`);
   return { success: true, data: { saved: true } };
 }
 

@@ -88,7 +88,8 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
               <NavItem href="/hackathon2.0/admin/import"       icon={Upload}    label="Import"        onClick={close} />
               <NavItem href="/hackathon2.0/admin/teams"        icon={Users}     label="Teams"        onClick={close} />
               <NavItem href="/hackathon2.0/admin/submissions"  icon={Send}      label="Submissions"  onClick={close} />
-              <NavItem href="/hackathon2.0/admin/judging"      icon={Star}      label="Judging"      onClick={close} />
+              <NavItem href="/hackathon2.0/admin/ranking"      icon={Star}      label="Ranking"      onClick={close} />
+
               <NavItem href="/hackathon2.0/admin/content"      icon={Settings}  label="Content"      onClick={close} />
               <NavItem href="/hackathon2.0/admin/settings"     icon={MapPin}    label="Settings"     onClick={close} />
             </>
@@ -97,8 +98,6 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
           {/* Judge */}
           {isJudge && (
             <>
-              <SectionLabel>Judge</SectionLabel>
-              <NavItem href="/hackathon2.0/admin/judging"      icon={Star} label="Score Projects"    onClick={close} />
               <NavItem href="/hackathon2.0/admin/submissions"  icon={Send} label="All Submissions"   onClick={close} />
             </>
           )}

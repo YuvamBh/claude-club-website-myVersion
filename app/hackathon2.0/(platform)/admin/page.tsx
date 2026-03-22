@@ -65,7 +65,7 @@ export default async function AdminPage() {
         <QuickAction href="/hackathon2.0/admin/scanner" icon={QrCode} label="QR Scanner" description="Check in participants" accent />
         <QuickAction href="/hackathon2.0/admin/applicants" icon={Users} label="Participants" description={`${totalParticipants ?? 0} registered`} />
         <QuickAction href="/hackathon2.0/admin/submissions" icon={Send} label="Submissions" description={`${submittedCount ?? 0} submitted`} />
-        <QuickAction href="/hackathon2.0/admin/judging" icon={Star} label="Judging" description="Score projects" />
+
       </div>
 
       {/* Check-in stats - the #1 priority during event */}

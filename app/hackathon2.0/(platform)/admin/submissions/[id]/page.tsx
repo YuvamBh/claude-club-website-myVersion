@@ -1,29 +1,33 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
-import { getSubmissionById } from "@/lib/hackathon2.0/queries";
+import { getSubmissionById, getActiveHackathon, getSubmissionRank } from "@/lib/hackathon2.0/queries";
 import { updateSubmissionStatus } from "@/lib/hackathon2.0/actions";
-import { ArrowLeft, Github, Video, Globe, FileText, ExternalLink, Crown } from "lucide-react";
+import { ArrowLeft, Github, Video, Globe, FileText, ExternalLink, Crown, Trophy, Target, BarChart3, TrendingUp, Info } from "lucide-react";
+import JudgingForm from "./JudgingForm";
 
 export default async function SubmissionDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
+  const currentJudge = await requireAdmin();
   const { id } = await params;
   const submission = await getSubmissionById(id);
+  const hackathon = await getActiveHackathon();
+  const rankData = await getSubmissionRank(id, submission?.hackathonId);
+  
   if (!submission) notFound();
 
   const { team } = submission;
+  const criteria = hackathon?.judgingCriteria ?? [];
 
   async function handleStatusUpdate(formData: FormData) {
     "use server";
     const status = formData.get("status") as
-      | "UNDER_REVIEW"
       | "SHORTLISTED"
       | "WINNER"
-      | "DISQUALIFIED";
+      | "REJECTED";
     const notes = formData.get("notes") as string;
     await updateSubmissionStatus(id, status, notes);
   }
@@ -44,21 +48,37 @@ export default async function SubmissionDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sidebar */}
         <div className="space-y-5">
-          {/* Status card */}
+          {/* Status & Rank Card */}
           <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-5">
-            <div className="mb-3">
+            <div className="flex justify-between items-start mb-4">
               <StatusBadge status={submission.status} large />
+              {rankData && (
+                <div className="text-right">
+                  <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Rank</div>
+                  <div className="text-lg font-black text-[#ff9b7a] leading-none">#{rankData.rank}</div>
+                </div>
+              )}
             </div>
+
+            {rankData && (
+              <div className="mb-4 p-3 rounded-lg bg-white/3 border border-white/5 space-y-2">
+                <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider">
+                  <span className="text-white/30">Percentile</span>
+                  <span className="text-emerald-400">{rankData.percentile}%</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider">
+                  <span className="text-white/30">Avg Score</span>
+                  <span className="text-white/70">{rankData.finalScore.toFixed(1)}</span>
+                </div>
+              </div>
+            )}
+
             {submission.submittedAt && (
-              <p className="text-xs text-white/30">
+              <p className="text-[10px] text-white/30 uppercase tracking-tight">
                 Submitted {submission.submittedAt.toLocaleString()}
               </p>
             )}
-            {submission.updatedAt && (
-              <p className="text-xs text-white/20 mt-0.5">
-                Last updated {submission.updatedAt.toLocaleString()}
-              </p>
-            )}
+            
             {submission.status !== "DRAFT" && (
               <form action={async () => {
                 "use server";
@@ -82,7 +102,7 @@ export default async function SubmissionDetailPage({
             </p>
             <form action={handleStatusUpdate} className="space-y-3">
               <div className="space-y-1.5">
-                {(["UNDER_REVIEW", "SHORTLISTED", "WINNER", "DISQUALIFIED"] as const).map((s) => (
+                {(["SHORTLISTED", "WINNER", "REJECTED"] as const).map((s) => (
                   <button
                     key={s}
                     name="status"
@@ -131,6 +151,40 @@ export default async function SubmissionDetailPage({
               ))}
             </div>
           </div>
+
+          {/* Judging Form */}
+          {(() => {
+            const judge = currentJudge; // We need to fetch this
+            const judgeScores = (submission.hackathon_judge_scores || []).filter((s: any) => s.judge_id === judge?.id);
+            const initialScores = judgeScores.reduce((acc: any, s: any) => ({ ...acc, [s.criterion_id]: s.score }), {});
+            
+            // Extract notes and override for this specific judge from admin_notes
+            let initialNotes = "";
+            let initialOverride = "";
+            if (submission.adminNotes && judge?.name) {
+              const judgeSectionRegex = new RegExp(`\\[Judge ${judge.name}\\]: ([\\s\\S]*?)(?=\\n\\n\\[Judge|$)`);
+              const match = submission.adminNotes.match(judgeSectionRegex);
+              if (match) {
+                let content = match[1].trim();
+                const overrideMatch = content.match(/\[Manual Override Final Score: (\d+)\]/);
+                if (overrideMatch) {
+                  initialOverride = overrideMatch[1];
+                  content = content.replace(/\[Manual Override Final Score: \d+\]\n?/, "").trim();
+                }
+                initialNotes = content;
+              }
+            }
+
+            return (
+              <JudgingForm 
+                submissionId={id} 
+                criteria={criteria} 
+                initialScores={initialScores}
+                initialOverride={initialOverride}
+                initialNotes={initialNotes}
+              />
+            );
+          })()}
         </div>
 
         {/* Main content */}
@@ -249,9 +303,9 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
   const map: Record<string, string> = {
     DRAFT: "bg-white/5 text-white/40",
     SUBMITTED: "bg-blue-500/10 text-blue-400",
-    UNDER_REVIEW: "bg-purple-500/10 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
     WINNER: "bg-yellow-400/20 text-yellow-300",
+    REJECTED: "bg-red-500/10 text-red-500",
     DISQUALIFIED: "bg-[#ff9b7a]/10 text-[#ff9b7a]",
   };
   return (
@@ -263,10 +317,9 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
 
 function statusActiveClass(s: string): string {
   const map: Record<string, string> = {
-    UNDER_REVIEW: "bg-purple-500/10 border-purple-500/30 text-purple-400",
     SHORTLISTED: "bg-[#ff9b7a]/10 border-[#ff9b7a]/30 text-[#ff9b7a]",
     WINNER: "bg-yellow-400/10 border-yellow-400/30 text-yellow-300",
-    DISQUALIFIED: "bg-[#ff9b7a]/10 border-[#ff9b7a]/30 text-[#ff9b7a]",
+    REJECTED: "bg-red-500/10 border-red-500/30 text-red-500",
   };
   return map[s] ?? "";
 }

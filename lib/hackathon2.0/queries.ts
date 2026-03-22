@@ -357,7 +357,9 @@ export async function getSubmissionById(id: string) {
              *, hackathon_applications(*)
            )
          )
-       )`
+       ),
+       hackathon_judge_scores(*)
+      `
     )
     .eq("id", id)
     .maybeSingle();
@@ -526,29 +528,79 @@ export async function getAllSubmissionsForJudging(hackathonId: string) {
   const { data, error } = await db
     .from("hackathon_submissions")
     .select(`
-      id, project_name, tagline, status, track_id, submitted_at,
+      id, project_name, tagline, status, track_id, submitted_at, admin_notes,
       hackathon_teams(name, hackathon_tracks(name), hackathon_team_members(hackathon_users(name))),
       hackathon_judge_scores(judge_id, score, criterion_id)
     `)
     .eq("hackathon_id", hackathonId)
-    .eq("status", "SUBMITTED")
+    .neq("status", "DRAFT")
     .order("submitted_at", { ascending: false, nullsFirst: false });
 
   if (error) throw error;
-  return (data ?? []).map((sub) => {
+  
+  const submissions = (data ?? []).map((sub) => {
     const n = normalize(sub) as Row;
     const t = sub.hackathon_teams as Row;
     const scores = (sub.hackathon_judge_scores ?? []) as Row[];
-    const totalScore = scores.length > 0
-      ? scores.reduce((sum: number, s: Row) => sum + (s.score ?? 0), 0) / scores.length
-      : null;
+    
+    // Group scores by judge to get total score per judge
+    const scoresByJudge: Record<string, number> = {};
+    scores.forEach((s: any) => {
+      scoresByJudge[s.judge_id] = (scoresByJudge[s.judge_id] || 0) + (s.score ?? 0);
+    });
+    
+    const judgeTotals = Object.values(scoresByJudge);
+    const avgTotalScore = judgeTotals.length > 0
+      ? judgeTotals.reduce((a, b) => a + b, 0) / judgeTotals.length
+      : 0;
+
+    // Check for manual override in notes
+    let finalScore = avgTotalScore;
+    const overrideMatch = sub.admin_notes?.match(/\[Manual Override Final Score: (\d+)\]/);
+    if (overrideMatch) {
+      finalScore = parseInt(overrideMatch[1]);
+    }
+
     return {
       ...n,
       team: t ? { ...normalize(t), track: normalize(t.hackathon_tracks ?? null) } : null,
       scores: normalize(scores),
-      avgScore: totalScore ? Math.round(totalScore * 10) / 10 : null,
+      avgScore: Math.round(avgTotalScore * 10) / 10,
+      finalScore,
+      judgeCount: judgeTotals.length,
     } as any;
   });
+
+  // Sort by finalScore descending to determine rank
+  const ranked = [...submissions].sort((a, b) => b.finalScore - a.finalScore);
+  
+  return submissions.map(sub => {
+    const rank = ranked.findIndex(r => r.id === sub.id) + 1;
+    const total = ranked.length;
+    const percentile = total > 1 ? Math.round((1 - (rank - 1) / (total - 1)) * 100) : 100;
+    
+    return {
+      ...sub,
+      rank,
+      totalCount: total,
+      percentile,
+    };
+  });
+}
+
+export async function getSubmissionRank(submissionId: string, hackathonId: string | undefined) {
+  if (!hackathonId) return null;
+  const submissions = await getAllSubmissionsForJudging(hackathonId);
+  const sub = submissions.find((s) => s.id === submissionId);
+  if (!sub) return null;
+  
+  return {
+    rank: sub.rank,
+    total: sub.totalCount,
+    percentile: sub.percentile,
+    finalScore: sub.finalScore,
+    judgeCount: sub.judgeCount,
+  };
 }
 
 export async function getAdminCheckinStats(hackathonId: string) {
