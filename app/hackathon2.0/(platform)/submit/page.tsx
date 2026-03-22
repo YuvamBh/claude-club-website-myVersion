@@ -121,18 +121,30 @@ export default function SubmitPage() {
     const errs: Record<string, string> = {};
     if (s === 1) {
       if (!form.projectName.trim()) errs.projectName = "Project name is required";
-      if (form.shortDescription.trim().length > 500) errs.shortDescription = "Too long";
+      if (!form.trackId) errs.trackId = "Track is required";
+      if (!form.shortDescription.trim()) errs.shortDescription = "Short description is required";
+      if (form.shortDescription.trim().length > 500) errs.shortDescription = "Too long (max 500 chars)";
     }
     if (s === 2) {
       if (!form.githubUrl.trim()) errs.githubUrl = "GitHub URL is required";
-      // Basic URL check
-      try {
-        if (form.githubUrl.trim()) new URL(form.githubUrl);
-      } catch {
-        errs.githubUrl = "Invalid URL";
-      }
+      if (!form.videoUrl.trim()) errs.videoUrl = "Demo Video URL is required";
+      
+      try { if (form.githubUrl.trim()) new URL(form.githubUrl); } catch { errs.githubUrl = "Invalid URL"; }
+      try { if (form.demoUrl.trim()) new URL(form.demoUrl); } catch { errs.demoUrl = "Invalid URL"; }
+      try { if (form.videoUrl.trim()) new URL(form.videoUrl); } catch { errs.videoUrl = "Invalid URL"; }
     }
-    // Step 3 (Details) is mostly optional but we can add checks if needed
+    if (s === 3) {
+      if (!form.problemStatement.trim()) errs.problemStatement = "Problem statement is required";
+      if (form.problemStatement.trim().length > 500) errs.problemStatement = "Too long (max 500 chars)";
+      
+      if (!form.solutionOverview.trim()) errs.solutionOverview = "Solution overview is required";
+      if (form.solutionOverview.trim().length > 1000) errs.solutionOverview = "Too long (max 1000 chars)";
+      
+      const words = form.longDescription.trim() ? form.longDescription.trim().split(/\s+/).length : 0;
+      if (words > 300) errs.longDescription = `Too long (${words}/300 words)`;
+      
+      if (form.additionalNotes.trim().length > 500) errs.additionalNotes = "Too long (max 500 chars)";
+    }
     
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -368,21 +380,22 @@ export default function SubmitPage() {
                 readOnly={isReadOnly}
               />
             </Field>
-            {team.tracks && team.tracks.length > 0 && (
-              <Field label="Track">
-                <select
-                  className={inputCls()}
-                  value={form.trackId}
-                  onChange={(e) => set("trackId", e.target.value)}
-                  disabled={isReadOnly}
-                >
-                  <option value="">Select a track</option>
-                  {team.tracks.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-              </Field>
-            )}
+            <Field label="Track" error={errors.trackId} required>
+              <select
+                className={inputCls(!!errors.trackId)}
+                value={form.trackId}
+                onChange={(e) => set("trackId", e.target.value)}
+                disabled={isReadOnly}
+              >
+                <option value="">Select a track</option>
+                <option value="Biology & Physical Health">1a. Biology & Physical Health</option>
+                <option value="Mental Health">1b. Mental Health</option>
+                <option value="AI Tooling">2. AI Tooling</option>
+                <option value="Economic Empowerment & Education">3. Economic Empowerment & Education</option>
+                <option value="Governance and Collaboration">4. Governance and Collaboration</option>
+                <option value="Creative Flourishing">5. Creative Flourishing</option>
+              </select>
+            </Field>
             <Field label="Short Description (max 500 chars)" error={errors.shortDescription}>
               <textarea
                 className={`${inputCls(!!errors.shortDescription)} min-h-[80px] resize-y`}
@@ -450,18 +463,21 @@ export default function SubmitPage() {
               readOnly={isReadOnly}
             />
             <LinkField
-              label="Demo / Live Site"
+              label="Live Demo"
               icon={Globe}
               placeholder="https://myproject.vercel.app"
               value={form.deploymentUrl}
+              error={errors.demoUrl}
               onChange={(v) => set("deploymentUrl", v)}
               readOnly={isReadOnly}
             />
             <LinkField
-              label="Demo Video"
+              label="Demo Video (YouTube)"
               icon={Video}
               placeholder="https://youtube.com/watch?v=..."
               value={form.videoUrl}
+              error={errors.videoUrl}
+              required
               onChange={(v) => set("videoUrl", v)}
               readOnly={isReadOnly}
             />
@@ -480,41 +496,50 @@ export default function SubmitPage() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-base font-semibold text-white mb-4">Project Details</h2>
-            <Field label="Problem Statement">
+            <Field label="Problem Statement (max 500 chars)" required error={errors.problemStatement}>
               <textarea
-                className={`${inputCls()} min-h-[100px] resize-y`}
+                className={`${inputCls(!!errors.problemStatement)} min-h-[100px] resize-y`}
                 placeholder="What problem does your project solve?"
                 value={form.problemStatement}
+                maxLength={500}
                 onChange={(e) => set("problemStatement", e.target.value)}
                 readOnly={isReadOnly}
               />
+              <p className="text-xs text-white/30 mt-1 text-right">{form.problemStatement.length}/500</p>
             </Field>
-            <Field label="Solution Overview">
+            <Field label="Solution Overview (max 1000 chars)" required error={errors.solutionOverview}>
               <textarea
-                className={`${inputCls()} min-h-[100px] resize-y`}
+                className={`${inputCls(!!errors.solutionOverview)} min-h-[140px] resize-y`}
                 placeholder="How does your project solve it?"
                 value={form.solutionOverview}
+                maxLength={1000}
                 onChange={(e) => set("solutionOverview", e.target.value)}
                 readOnly={isReadOnly}
               />
+              <p className="text-xs text-white/30 mt-1 text-right">{form.solutionOverview.length}/1000</p>
             </Field>
-            <Field label="Long Description">
+            <Field label="Description (max 300 words)" error={errors.longDescription}>
               <textarea
-                className={`${inputCls()} min-h-[140px] resize-y`}
+                className={`${inputCls(!!errors.longDescription)} min-h-[140px] resize-y`}
                 placeholder="Full description of your project, architecture, challenges faced..."
                 value={form.longDescription}
                 onChange={(e) => set("longDescription", e.target.value)}
                 readOnly={isReadOnly}
               />
+              <p className="text-xs text-white/30 mt-1 text-right">
+                {form.longDescription.trim() ? form.longDescription.trim().split(/\s+/).length : 0}/300 words
+              </p>
             </Field>
-            <Field label="Additional Notes">
+            <Field label="Additional Notes (max 500 chars)" error={errors.additionalNotes}>
               <textarea
-                className={`${inputCls()} min-h-[80px] resize-y`}
+                className={`${inputCls(!!errors.additionalNotes)} min-h-[80px] resize-y`}
                 placeholder="Anything else you'd like the judges to know?"
                 value={form.additionalNotes}
+                maxLength={500}
                 onChange={(e) => set("additionalNotes", e.target.value)}
                 readOnly={isReadOnly}
               />
+              <p className="text-xs text-white/30 mt-1 text-right">{form.additionalNotes.length}/500</p>
             </Field>
           </div>
         )}
@@ -538,16 +563,25 @@ export default function SubmitPage() {
             </div>
 
             <div className="border-t border-white/10 pt-4">
-              <label className="flex items-start gap-3 cursor-pointer">
+              <label className="flex items-start gap-4 cursor-pointer group w-fit">
                 <input
                   type="checkbox"
-                  className="mt-0.5 accent-[#ff9b7a]"
+                  className="sr-only"
                   checked={form.agreedToRules}
                   onChange={(e) => set("agreedToRules", e.target.checked)}
                   disabled={isReadOnly}
                 />
-                <span className="text-sm text-white/60">
-                  I confirm this project was built during the hackathon and I agree to the
+                <div 
+                  className={`mt-0.5 shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded transition-colors ${
+                    form.agreedToRules 
+                      ? "bg-[#ff9b7a] border-transparent" 
+                      : "bg-[#111] border border-white/20 group-hover:border-white/40"
+                  }`}
+                >
+                  {form.agreedToRules && <CheckCircle2 size={12} className="text-[#1a1a1a]" strokeWidth={3} />}
+                </div>
+                <span className={`text-sm tracking-wide transition-colors ${form.agreedToRules ? "text-white/80" : "text-white/50"}`}>
+                  I confirm this project was built during the hackathon and I agree to the <br className="hidden sm:block" />
                   hackathon rules, judging criteria, and code of conduct.
                 </span>
               </label>
@@ -587,10 +621,10 @@ export default function SubmitPage() {
         ) : !isReadOnly && (
           <button
             onClick={handleSubmit}
-            disabled={isPending}
-            className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium bg-[#ff9b7a] hover:bg-[#ffb89e] text-black rounded-lg transition-colors disabled:opacity-50"
+            disabled={isPending || !form.agreedToRules}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 w-full sm:w-auto text-sm font-semibold bg-[#ff9b7a] hover:bg-[#ffb89e] text-[#1a1a1a] rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Send size={13} />
+            <Send size={15} className={isPending ? "animate-pulse" : ""} />
             {isPending ? "Submitting…" : "Submit Project"}
           </button>
         )}
