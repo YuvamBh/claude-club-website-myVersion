@@ -10,7 +10,8 @@ export default async function AdminRankingPage() {
   const hackathon = await getActiveHackathon();
   if (!hackathon) return <p className="text-white/40 p-8">No active hackathon found.</p>;
 
-  const rankedSubmissions = await getAllSubmissionsForJudging(hackathon.id);
+  const rankedSubmissions = (await getAllSubmissionsForJudging(hackathon.id))
+    .sort((a, b) => a.rank - b.rank);
 
   return (
     <div className="max-w-6xl mx-auto">

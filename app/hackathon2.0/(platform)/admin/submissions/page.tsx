@@ -34,6 +34,7 @@ export default async function AdminSubmissionsPage({
   }, {});
 
   const statuses = ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "SHORTLISTED", "WINNER", "DISQUALIFIED"];
+  const trackMap = Object.fromEntries((hackathon.tracks ?? []).map((t: any) => [t.id, t.name]));
 
   return (
     <div>
@@ -130,16 +131,13 @@ export default async function AdminSubmissionsPage({
                     <p className="text-xs text-white/30">{sub.team.members.length} members</p>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
-                    {(() => {
-                      const track = hackathon.tracks?.find((t: any) => t.id === sub.trackId);
-                      return track ? (
-                        <span className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2 py-0.5 rounded-full">
-                          {track.name}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-white/20">-</span>
-                      );
-                    })()}
+                    {trackMap[sub.trackId] ? (
+                      <span className="text-xs bg-[#ff9b7a]/10 text-[#ff9b7a] px-2 py-0.5 rounded-full">
+                        {trackMap[sub.trackId]}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-white/20">-</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <div className="flex gap-2">

@@ -556,8 +556,7 @@ export async function updateApplicationStatus(
 
 export async function updateSubmissionStatus(
   submissionId: string,
-  status: "SHORTLISTED" | "WINNER" | "REJECTED",
-  adminNotes?: string
+  status: "SHORTLISTED" | "WINNER" | "REJECTED"
 ): Promise<ActionResult> {
   await requireAdmin();
   const db = createAdminClient();
@@ -566,7 +565,6 @@ export async function updateSubmissionStatus(
     .from("hackathon_submissions")
     .update({
       status,
-      admin_notes: adminNotes ?? null,
       reviewed_at: new Date().toISOString(),
     })
     .eq("id", submissionId)
@@ -576,6 +574,7 @@ export async function updateSubmissionStatus(
   if (error) return { success: false, error: error.message };
 
   revalidatePath("/hackathon2.0/admin/submissions");
+  revalidatePath(`/hackathon2.0/admin/submissions/${submissionId}`);
   return { success: true, data };
 }
 

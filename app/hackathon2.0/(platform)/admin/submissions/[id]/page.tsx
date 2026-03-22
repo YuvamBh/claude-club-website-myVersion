@@ -25,12 +25,8 @@ export default async function SubmissionDetailPage({
 
   async function handleStatusUpdate(formData: FormData) {
     "use server";
-    const status = formData.get("status") as
-      | "SHORTLISTED"
-      | "WINNER"
-      | "REJECTED";
-    const notes = formData.get("notes") as string;
-    await updateSubmissionStatus(id, status, notes);
+    const status = formData.get("status") as "SHORTLISTED" | "WINNER" | "REJECTED";
+    await updateSubmissionStatus(id, status);
   }
 
   return (
@@ -106,28 +102,20 @@ export default async function SubmissionDetailPage({
             <p className="text-xs text-white/40 uppercase tracking-wide font-medium mb-3">
               Review Actions
             </p>
-            <form action={handleStatusUpdate} className="space-y-3">
-              <div className="space-y-1.5">
-                {(["SHORTLISTED", "WINNER", "REJECTED"] as const).map((s) => (
-                  <button
-                    key={s}
-                    name="status"
-                    value={s}
-                    type="submit"
-                    className={`w-full text-left text-xs py-2 px-3 rounded-lg border transition-colors ${
-                      submission.status === s ? statusActiveClass(s) : "border-white/10 text-white/40 hover:border-white/20"
-                    }`}
-                  >
-                    {s.replace("_", " ")}
-                  </button>
-                ))}
-              </div>
-              <textarea
-                name="notes"
-                defaultValue={submission.adminNotes ?? ""}
-                placeholder="Internal notes..."
-                className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/60 placeholder-white/20 outline-none min-h-[80px] resize-y"
-              />
+            <form action={handleStatusUpdate} className="space-y-1.5">
+              {(["SHORTLISTED", "WINNER", "REJECTED"] as const).map((s) => (
+                <button
+                  key={s}
+                  name="status"
+                  value={s}
+                  type="submit"
+                  className={`w-full text-left text-xs py-2 px-3 rounded-lg border transition-colors ${
+                    submission.status === s ? statusActiveClass(s) : "border-white/10 text-white/40 hover:border-white/20"
+                  }`}
+                >
+                  {s.replace("_", " ")}
+                </button>
+              ))}
             </form>
           </div>
 
