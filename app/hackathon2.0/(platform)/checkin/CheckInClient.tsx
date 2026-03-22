@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MapPin, QrCode, CheckCircle2, AlertCircle, Loader2, ChevronRight, Calendar, Sparkles } from "lucide-react";
+import { MapPin, QrCode, CheckCircle2, AlertCircle, Loader2, ChevronRight, Calendar, Sparkles, Lock } from "lucide-react";
 import { checkinWithLocation } from "@/lib/hackathon2.0/actions";
+import { todayArizona } from "@/lib/hackathon2.0/timezone";
+import { CHECKIN_LOCKED } from "@/lib/hackathon2.0/feature-flags";
 import Link from "next/link";
 import QRCode from "qrcode";
 
@@ -38,7 +40,7 @@ export function CheckInClient({
   const [locMessage, setLocMessage] = useState("");
 
   const checkedInDayIds = new Set(checkins.map((c) => c.checkinDayId));
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayArizona();
   const todayDay = days.find((d) => d.date === today);
   const checkedInToday = todayDay ? checkedInDayIds.has(todayDay.id) : false;
   const requiredDays = days.filter((d) => d.required);
@@ -99,7 +101,17 @@ export function CheckInClient({
     <div className="max-w-lg mx-auto space-y-4">
 
       {/* ── Today's check-in status banner ── */}
-      {checkedInToday ? (
+      {CHECKIN_LOCKED ? (
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+            <Lock size={17} className="text-white/40" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white/70">Check-in is either not yet open or already closed.</p>
+            <p className="text-xs text-white/30 mt-0.5">Please see an organizer.</p>
+          </div>
+        </div>
+      ) : checkedInToday ? (
         <div className="rounded-2xl bg-green-400/10 border border-green-400/25 p-5 flex items-center gap-4">
           <div className="w-11 h-11 rounded-full bg-green-400/20 flex items-center justify-center shrink-0">
             <CheckCircle2 size={22} className="text-green-400" />

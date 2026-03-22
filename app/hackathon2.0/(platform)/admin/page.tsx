@@ -1,7 +1,8 @@
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getActiveHackathon, getAdminCheckinStats, getAllParticipants } from "@/lib/hackathon2.0/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Users, Send, QrCode, Star, CheckCircle2, Clock, ChevronRight, Zap } from "lucide-react";
+import { todayArizona } from "@/lib/hackathon2.0/timezone";
+import { Users, Send, QrCode, Star, CheckCircle2, ChevronRight, Zap } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +49,7 @@ export default async function AdminPage() {
 
   const submissions = recentSubmissionsData ?? [];
   const latestCheckins = recentCheckins ?? [];
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayArizona();
   const todayCheckin = checkinStats.find((d: any) => d.date === today);
   const subRate = (totalTeams ?? 0) > 0 ? Math.round(((submittedCount ?? 0) / (totalTeams ?? 1)) * 100) : 0;
 

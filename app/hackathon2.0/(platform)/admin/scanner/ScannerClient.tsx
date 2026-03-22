@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Camera, CheckCircle2, AlertCircle, Loader2, QrCode, X } from "lucide-react";
 import { adminCheckinByQr } from "@/lib/hackathon2.0/actions";
+import { todayArizona } from "@/lib/hackathon2.0/timezone";
 import jsQR from "jsqr";
 
 interface ScannerClientProps {
@@ -22,7 +23,7 @@ export function ScannerClient({ hackathonId, days }: ScannerClientProps) {
 
   // Today's day auto-select
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayArizona();
     const todayDay = days.find((d) => d.date === today);
     if (todayDay) setSelectedDay(todayDay.id);
   }, [days]);

@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/hackathon2.0/rbac";
 import { getActiveHackathon, getAllParticipants, getCheckinDays } from "@/lib/hackathon2.0/queries";
+import { todayArizona } from "@/lib/hackathon2.0/timezone";
 import { CheckCircle2, Circle, Users, Github } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,7 @@ export default async function AdminParticipantsPage({
   });
 
   const checkedInToday = (() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayArizona();
     const todayDay = days.find((d: any) => d.date === today);
     if (!todayDay) return null;
     return participants.filter((p: any) =>
@@ -111,7 +112,7 @@ export default async function AdminParticipantsPage({
               participants.length > 0
                 ? Math.round((count / participants.length) * 100)
                 : 0;
-            const today = new Date().toISOString().split("T")[0];
+            const today = todayArizona();
             const isToday = d.date === today;
             return (
               <div
