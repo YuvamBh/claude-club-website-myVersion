@@ -117,6 +117,12 @@ export default async function SubmissionDetailPage({
                 </button>
               ))}
             </form>
+            {submission.adminNotes && (
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <p className="text-[10px] text-white/30 uppercase tracking-wide font-medium mb-1.5">Judge Notes</p>
+                <p className="text-xs text-white/40 whitespace-pre-wrap break-words">{submission.adminNotes}</p>
+              </div>
+            )}
           </div>
 
           {/* Bonus Points */}
