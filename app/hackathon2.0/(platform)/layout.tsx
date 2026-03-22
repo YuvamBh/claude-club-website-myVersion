@@ -24,7 +24,7 @@ export default async function PlatformLayout({
       <HackathonSidebar user={user} />
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto relative z-10 pt-16 lg:pt-0">
+      <main className="flex-1 overflow-auto relative z-10 pt-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">{children}</div>
       </main>
     </div>

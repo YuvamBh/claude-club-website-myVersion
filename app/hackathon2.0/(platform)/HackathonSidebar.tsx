@@ -37,8 +37,8 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#161616]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 z-40">
+      {/* Global Header */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-[#161616]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 sm:px-6 z-40">
         <Link href="/hackathon2.0" className="flex items-center gap-2">
           <Trophy size={17} className="text-[#ff9b7a]" />
           <span className="font-bold text-[#ff9b7a] text-sm tracking-wide">HackASU</span>
@@ -48,11 +48,11 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
         </button>
       </div>
 
-      {/* Sidebar - desktop fixed, mobile overlay */}
+      {/* Sidebar - drawer on all screens */}
       <aside
-        className={`fixed inset-y-0 left-0 w-60 border-r border-white/10 flex flex-col bg-[#161616] z-50 transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 w-64 border-r border-white/10 flex flex-col bg-[#161616] z-50 transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:h-screen`}
+        }`}
       >
         {/* Brand */}
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
@@ -60,7 +60,7 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
             <Trophy size={19} className="text-[#ff9b7a]" />
             <span className="font-bold text-[#ff9b7a] text-sm tracking-wide">HackASU</span>
           </Link>
-          <button onClick={close} className="lg:hidden p-1 text-white/40 hover:text-white transition-colors">
+          <button onClick={close} className="p-1 text-white/40 hover:text-white transition-colors">
             <X size={17} />
           </button>
         </div>
@@ -75,7 +75,6 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
               <NavItem href="/hackathon2.0/checkin" icon={LayoutDashboard} label="Dashboard"   onClick={close} />
               <NavItem href="/hackathon2.0/team"    icon={Users}           label="Team"        onClick={close} />
               <NavItem href="/hackathon2.0/submit"  icon={Send}            label="Submissions" onClick={close} />
-              <NavItem href="/hackathon2.0/tracks"  icon={Zap}             label="Tracks"      onClick={close} />
             </>
           )}
 
@@ -125,9 +124,9 @@ export function HackathonSidebar({ user }: HackathonSidebarProps) {
         </div>
       </aside>
 
-      {/* Mobile backdrop */}
+      {/* Backdrop */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={close} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={close} />
       )}
     </>
   );
