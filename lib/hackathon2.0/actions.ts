@@ -430,17 +430,7 @@ export async function saveSubmission(
     return { success: false, error: "Submissions are currently locked." };
   }
 
-  // Check submission deadline
   if (parsed.data.submit) {
-    const { data: hackathon } = await db
-      .from("hackathons")
-      .select("submission_deadline")
-      .eq("id", parsed.data.hackathonId)
-      .maybeSingle();
-
-    if (hackathon?.submission_deadline && new Date() > new Date(hackathon.submission_deadline)) {
-      return { success: false, error: "Submission deadline has passed." };
-    }
     if (!parsed.data.agreedToRules) {
       return { success: false, error: "You must agree to the rules before submitting." };
     }
