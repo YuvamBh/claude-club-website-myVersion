@@ -59,6 +59,20 @@ export default async function SubmissionDetailPage({
                 Last updated {submission.updatedAt.toLocaleString()}
               </p>
             )}
+            {submission.status !== "DRAFT" && (
+              <form action={async () => {
+                "use server";
+                const { unlockSubmission } = await import("@/lib/hackathon2.0/actions");
+                await unlockSubmission(id);
+              }}>
+                <button
+                  type="submit"
+                  className="w-full mt-4 flex items-center justify-center gap-1.5 text-xs py-2 px-3 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  Unlock (Revert to Draft)
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Admin controls */}

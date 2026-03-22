@@ -258,32 +258,25 @@ export default function SubmitPage() {
     );
   }
 
-  // Read-only logic: captains have full control (unless locked), others just see.
+  // Read-only logic: captains have full control (unless locked or submitted), others just see.
   // Global lock applies to everyone except admins (but client-side we just follow the flag)
   const isLocked = SUBMISSION_LOCKED;
-  const isReadOnly = !isCaptain || isLocked;
-
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <CheckCircle2 size={48} className="text-green-400 mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Project Submitted!</h2>
-        <p className="text-white/40 text-sm">
-          Your submission for <strong className="text-white/60">{form.projectName}</strong> is in.
-          Good luck! 🎉
-        </p>
-        <button
-          onClick={() => { setSubmitted(false); }}
-          className="mt-6 text-sm text-[#ff9b7a] hover:text-[#ffb89e] transition-colors"
-        >
-          Edit submission
-        </button>
-      </div>
-    );
-  }
+  const isReadOnly = !isCaptain || isLocked || submitted;
 
   return (
     <div>
+      {submitted && (
+        <div className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-200">
+          <div className="flex items-center gap-2 mb-1">
+            <CheckCircle2 size={16} className="text-blue-400" />
+            <h3 className="font-semibold text-sm">Project Submitted & Under Evaluation</h3>
+          </div>
+          <p className="text-xs text-blue-200/70 leading-relaxed">
+            Your project has been successfully submitted and is currently being evaluated.
+            If you need to make any changes to your submission, please see an organizer.
+          </p>
+        </div>
+      )}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -321,7 +314,7 @@ export default function SubmitPage() {
             <p className="text-xs text-white/40">The submission window is currently closed. You can view your draft, but cannot make changes.</p>
           </div>
         </div>
-      ) : isReadOnly && (
+      ) : !isCaptain && !submitted && (
         <div className="mb-6 px-4 py-3 bg-[#ff9b7a]/5 border border-[#ff9b7a]/10 rounded-lg flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[#ff9b7a]/10 flex items-center justify-center shrink-0">
             <Presentation size={14} className="text-[#ff9b7a]" />

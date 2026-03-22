@@ -483,8 +483,55 @@ export async function saveSubmission(
 
   if (error) return { success: false, error: error.message };
 
+  // Dispatch email to all team members if the project was just submitted
+  if (submit) {
+    try {
+      const { data: members } = await db
+        .from("hackathon_team_members")
+        .select("user_id")
+        .eq("team_id", teamId);
+
+      const memberIds = members?.map((m) => m.user_id) || [];
+      if (memberIds.length > 0) {
+        const { data: users } = await db
+          .from("hackathon_users")
+          .select("email")
+          .in("id", memberIds);
+
+        const emails = users?.map((u) => u.email).filter(Boolean) as string[];
+        if (emails && emails.length > 0) {
+          const { sendSubmissionConfirmationEmail } = await import("./email");
+          await sendSubmissionConfirmationEmail(emails, parsed.data.projectName);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to send submission email:", e);
+      // We still return success since the DB commit succeeded
+    }
+  }
+
   revalidatePath("/hackathon2.0/submit");
   revalidatePath("/hackathon2.0/dashboard");
+  return { success: true, data };
+}
+
+// ─── Admin: Unlock submission ────────────────────────────────────────────────
+
+export async function unlockSubmission(submissionId: string): Promise<ActionResult> {
+  await requireAdmin();
+  const db = createAdminClient();
+
+  const { data, error } = await db
+    .from("hackathon_submissions")
+    .update({ status: "DRAFT", submitted_at: null })
+    .eq("id", submissionId)
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath(`/hackathon2.0/admin/submissions/${submissionId}`);
+  revalidatePath("/hackathon2.0/admin/submissions");
   return { success: true, data };
 }
 
